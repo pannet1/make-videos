@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Audio,
   CanvasElement,
   Fill,
   Img,
@@ -10,6 +11,9 @@ import {
   useFrame,
 } from '@rendiv/core';
 import { staticFile } from '@rendiv/core';
+
+const MUSIC = 'music/upbeat.mp3';
+const VO = (n: number, ext = 'mp3'): string => `vo/${String(n).padStart(2, '0')}.${ext}`;
 
 const SLATE_950 = '#020617';
 const BLUE_500 = '#3b82f6';
@@ -899,7 +903,26 @@ const AfterWinning: React.FC = () => {
       </div>
       <div
         style={{
-          marginTop: 70,
+          marginTop: 30,
+          padding: '20px 32px',
+          borderRadius: 14,
+          backgroundColor: 'rgba(248,113,113,0.08)',
+          border: `1px solid ${RED_400}`,
+          fontSize: 26,
+          fontWeight: 700,
+          color: RED_400,
+          opacity: fade,
+          maxWidth: 1500,
+          textAlign: 'center',
+          lineHeight: 1.5,
+        }}
+      >
+        Pay the amount due via UPI before the expiry — if your wallet can&apos;t
+        cover the bid at closing, a random user is selected instead.
+      </div>
+      <div
+        style={{
+          marginTop: 60,
           display: 'flex',
           alignItems: 'flex-start',
           gap: 40,
@@ -929,19 +952,19 @@ const AfterWinning: React.FC = () => {
             }}
           />
         </div>
-        <FlowStep icon="\u263E" label="Scan UPI QR" frame={frame} start={110} />
-        <FlowStep icon="\u20B9" label="Pay amount due" frame={frame} start={160} />
+        <FlowStep icon={'\u263E'} label="Scan UPI QR" frame={frame} start={110} />
+        <FlowStep icon={'\u20B9'} label="Pay amount due" frame={frame} start={160} />
         <FlowStep
-          icon="\u2191"
+          icon={'\u2191'}
           label="Upload proof"
           frame={frame}
           start={210}
         />
-        <FlowStep icon="\u2713" label="Verified" frame={frame} start={260} />
+        <FlowStep icon={'\u2713'} label="Verified" frame={frame} start={260} />
       </div>
       <div
         style={{
-          marginTop: 70,
+          marginTop: 60,
           padding: '22px 34px',
           borderRadius: 12,
           backgroundColor: GREEN_600,
@@ -949,7 +972,7 @@ const AfterWinning: React.FC = () => {
         }}
       >
         <span style={{ color: WHITE, fontSize: 30, fontWeight: 800 }}>
-          Payment confirmed on your auction card
+          Winning and payment confirmed on your auction card
         </span>
       </div>
     </Fill>
@@ -1153,6 +1176,14 @@ const Closing: React.FC = () => {
 export const AuctionExplainer: React.FC = () => (
   <CanvasElement id="AuctionExplainer">
     <Fill style={{ backgroundColor: SLATE_950 }}>
+      <Audio src={staticFile(MUSIC)} volume={0.2} />
+      <Audio src={staticFile(VO(1))} startFrom={0} volume={1} />
+      <Audio src={staticFile(VO(2))} startFrom={450} volume={1} />
+      <Audio src={staticFile(VO(3))} startFrom={900} volume={1} />
+      <Audio src={staticFile(VO(4))} startFrom={1350} volume={1} />
+      <Audio src={staticFile(VO(5))} startFrom={2250} volume={1} />
+      <Audio src={staticFile(VO(6))} startFrom={2700} volume={1} />
+      <Audio src={staticFile(VO(7))} startFrom={3150} volume={1} />
       <Series>
         <Series.Sequence durationInFrames={450}>
           <Opening />
