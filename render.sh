@@ -21,15 +21,15 @@ OUTPUT="${2:-out/my-video.mp4}"
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
   docker start "${CONTAINER_NAME}" >/dev/null
 else
-  docker run -d --name "${CONTAINER_NAME}" -v "${VOLUME_SRC}:/workspace" \
+  docker run -d --name "${CONTAINER_NAME}" -v "${PROJECT_DIR}:/workspace" \
     "${IMAGE}" sh -c "tail -f /dev/null" >/dev/null
 fi
 
 # Work in the project dir and stdout/stderr wired through for live progress.
-# Uses the monorepo CLI (Playwright 1.49 / Chromium 1208) which is already
-# installed in the container — the npm-published renderer needs a newer
-# Chromium that fails to download on this network.
+# Uses the npm-published CLI (Playwright 1.62 / Chromium 1234). The browser
+# binaries and system deps are provisioned inside the container under
+# /root/.cache/ms-playwright — see the container bootstrap note.
 docker exec -w /workspace "${CONTAINER_NAME}" sh -c \
-  "node /workspace/rendiv/packages/cli/dist/cli.js render src/index.tsx ${COMPOSITION} ${OUTPUT}" 2>&1 || true
+  "node /workspace/node_modules/@rendiv/cli/dist/cli.js render src/index.tsx ${COMPOSITION} ${OUTPUT}" 2>&1 || true
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"
