@@ -12,8 +12,8 @@ import {
 } from '@rendiv/core';
 import { staticFile } from '@rendiv/core';
 
-const MUSIC = 'music/upbeat.mp3';
 const VO = (n: number, ext = 'mp3'): string => `vo/${String(n).padStart(2, '0')}.${ext}`;
+const VO_END = [279, 793, 1263, 1943, 2694, 3079, 3472];
 
 const SLATE_950 = '#020617';
 const BLUE_500 = '#3b82f6';
@@ -1176,14 +1176,13 @@ const Closing: React.FC = () => {
 export const AuctionExplainer: React.FC = () => (
   <CanvasElement id="AuctionExplainer">
     <Fill style={{ backgroundColor: SLATE_950 }}>
-      <Audio src={staticFile(MUSIC)} volume={0.2} />
-      <Audio src={staticFile(VO(1))} startFrom={0} volume={1} />
-      <Audio src={staticFile(VO(2))} startFrom={450} volume={1} />
-      <Audio src={staticFile(VO(3))} startFrom={900} volume={1} />
-      <Audio src={staticFile(VO(4))} startFrom={1350} volume={1} />
-      <Audio src={staticFile(VO(5))} startFrom={2250} volume={1} />
-      <Audio src={staticFile(VO(6))} startFrom={2700} volume={1} />
-      <Audio src={staticFile(VO(7))} startFrom={3150} volume={1} />
+      <Audio src={staticFile(VO(1))} startFrom={0} endAt={VO_END[0]} volume={1} />
+      <Audio src={staticFile(VO(2))} startFrom={450} endAt={VO_END[1]} volume={1} />
+      <Audio src={staticFile(VO(3))} startFrom={900} endAt={VO_END[2]} volume={1} />
+      <Audio src={staticFile(VO(4))} startFrom={1350} endAt={VO_END[3]} volume={1} />
+      <Audio src={staticFile(VO(5))} startFrom={2250} endAt={VO_END[4]} volume={1} />
+      <Audio src={staticFile(VO(6))} startFrom={2700} endAt={VO_END[5]} volume={1} />
+      <Audio src={staticFile(VO(7))} startFrom={3150} endAt={VO_END[6]} volume={1} />
       <Series>
         <Series.Sequence durationInFrames={450}>
           <Opening />
