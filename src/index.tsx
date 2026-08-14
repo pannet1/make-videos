@@ -1,7 +1,7 @@
 import React from 'react';
 import { setRootComponent, Composition } from '@rendiv/core';
-import { MyVideo } from './MyVideo';
-import { AuctionExplainer } from './AuctionExplainer';
+import { MyVideo } from './videos/demo/MyVideo';
+import { AuctionExplainer, TOTAL_FRAMES } from './videos/auction-explainer/AuctionExplainer';
 
 const Root: React.FC = () => (
   <>
@@ -16,7 +16,7 @@ const Root: React.FC = () => (
     <Composition
       id="AuctionExplainer"
       component={AuctionExplainer}
-      durationInFrames={4510}
+      durationInFrames={TOTAL_FRAMES}
       fps={30}
       width={1920}
       height={1080}

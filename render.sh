@@ -8,15 +8,15 @@ set -euo pipefail
 # Usage:
 #   ./render.sh COMPOSITION_ID [OUTPUT]
 # Example:
-#   ./render.sh MyVideo out/my-video.mp4
+#   ./render.sh AuctionExplainer out/auction-explainer.mp4
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONTAINER_NAME="rendiv"
 IMAGE="node:20-bookworm"
 VOLUME_SRC="$(dirname "$PROJECT_DIR")"
 
-COMPOSITION="${1:-MyVideo}"
-OUTPUT="${2:-out/my-video.mp4}"
+COMPOSITION="${1:-AuctionExplainer}"
+OUTPUT="${2:-out/auction-explainer.mp4}"
 
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
   docker start "${CONTAINER_NAME}" >/dev/null

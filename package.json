@@ -5,8 +5,8 @@
   "scripts": {
     "preview": "vite dev",
     "studio": "rendiv studio src/index.tsx",
-    "render": "rendiv render src/index.tsx MyVideo out/my-video.mp4",
-    "still": "rendiv still src/index.tsx MyVideo out/still.png",
+    "render": "rendiv render src/index.tsx AuctionExplainer out/auction-explainer.mp4",
+    "still": "rendiv still src/index.tsx AuctionExplainer out/still.png",
     "compositions": "rendiv compositions src/index.tsx"
   },
   "dependencies": {

@@ -10,174 +10,41 @@ import {
   spring,
   useCompositionConfig,
   useFrame,
+  staticFile,
 } from '@rendiv/core';
-import { staticFile } from '@rendiv/core';
+import {
+  BLUE_400,
+  BLUE_500,
+  BLUE_600,
+  GREEN_400,
+  GREEN_600,
+  RED_400,
+  SLATE_300,
+  SLATE_400,
+  SLATE_700,
+  SLATE_800,
+  SLATE_900,
+  SLATE_950,
+  WHITE,
+  YELLOW_400,
+  Brand,
+  NavBar,
+  SectionHeader,
+  StatTile,
+  fmt,
+  useFadeIn,
+} from '../../shared/theme';
 
-const VO = (n: number, ext = 'mp3'): string => `vo/${String(n).padStart(2, '0')}.${ext}`;
+const VIDEO_ID = 'auction-explainer';
+const VO = (n: number, ext = 'mp3'): string =>
+  `${VIDEO_ID}/vo/${String(n).padStart(2, '0')}.${ext}`;
+const ASSET = (p: string): string => `${VIDEO_ID}/assets/${p}`;
 const VO_START = [0, 466, 1021, 1502, 2229, 2976, 3558, 4111];
 const VO_LEN = [466, 555, 481, 727, 747, 582, 553, 399];
-
-const SLATE_950 = '#020617';
-const BLUE_500 = '#3b82f6';
-const BLUE_600 = '#2563eb';
-const BLUE_700 = '#1d4ed8';
-const GREEN_400 = '#4ade80';
-const GREEN_600 = '#16a34a';
-const GREEN_700 = '#15803d';
-const YELLOW_400 = '#facc15';
-const BLUE_400 = '#60a5fa';
-const SLATE_300 = '#cbd5e1';
-const SLATE_400 = '#94a3b8';
-const SLATE_700 = '#334155';
-const SLATE_800 = '#1e293b';
-const SLATE_900 = '#0f172a';
-const WHITE = '#ffffff';
-const RED_400 = '#f87171';
-
 const FONT =
   'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
 
-const IMAGES = [
-  'auction_5/1.jpeg',
-  'auction_5/2.jpeg',
-  'auction_5/3.jpeg',
-  'auction_5/4.jpeg',
-];
-
-const fmt = (n: number): string =>
-  'Rs. ' + Math.round(n).toLocaleString('en-IN');
-
-const Brand: React.FC<{ size?: number }> = ({ size = 30 }) => (
-  <div
-    style={{
-      fontFamily: FONT,
-      fontWeight: 900,
-      fontSize: size,
-      color: WHITE,
-      letterSpacing: -1,
-      lineHeight: 1,
-    }}
-  >
-    EcomSense<span style={{ color: BLUE_500 }}>.in</span>
-  </div>
-);
-
-const NavBar: React.FC<{ opacity?: number }> = ({ opacity = 1 }) => (
-  <div
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 76,
-      backgroundColor: 'rgba(0,0,0,0.9)',
-      borderBottom: '1px solid #1e293b',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 64px',
-      opacity,
-      zIndex: 10,
-    }}
-  >
-    <Brand />
-    <div style={{ display: 'flex', gap: 40 }}>
-      {['LOGIN', 'AUCTIONS', 'VPS', 'SCHEMATICS'].map((t) => (
-        <span
-          key={t}
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: 2,
-            color: SLATE_300,
-          }}
-        >
-          {t}
-        </span>
-      ))}
-    </div>
-  </div>
-);
-
-const useFadeIn = (frames = 14): number =>
-  interpolate(useFrame(), [0, frames], [0, 1], {
-    extrapolateRight: 'clamp',
-  });
-
-const SectionHeader: React.FC<{
-  title: string;
-  subtitle?: string;
-  fade?: number;
-}> = ({ title, subtitle, fade = 1 }) => (
-  <div style={{ opacity: fade }}>
-    <div
-      style={{
-        fontFamily: FONT,
-        fontWeight: 900,
-        fontSize: 72,
-        color: WHITE,
-        letterSpacing: -1,
-      }}
-    >
-      {title}
-    </div>
-    {subtitle ? (
-      <div
-        style={{
-          marginTop: 14,
-          fontFamily: FONT,
-          fontSize: 28,
-          color: SLATE_400,
-          fontWeight: 500,
-        }}
-      >
-        {subtitle}
-      </div>
-    ) : null}
-  </div>
-);
-
-const StatTile: React.FC<{
-  label: string;
-  value: string;
-  color: string;
-  fade?: number;
-  rise?: number;
-}> = ({ label, value, color, fade = 1, rise = 0 }) => (
-  <div
-    style={{
-      flex: 1,
-      backgroundColor: SLATE_800,
-      borderRadius: 8,
-      padding: '20px 24px',
-      opacity: fade,
-      transform: `translateY(${rise}px)`,
-    }}
-  >
-    <div
-      style={{
-        fontSize: 12,
-        fontWeight: 700,
-        letterSpacing: 2,
-        textTransform: 'uppercase',
-        color: SLATE_400,
-      }}
-    >
-      {label}
-    </div>
-    <div
-      style={{
-        marginTop: 8,
-        fontSize: 40,
-        fontWeight: 900,
-        color,
-        fontVariantNumeric: 'tabular-nums',
-      }}
-    >
-      {value}
-    </div>
-  </div>
-);
+const IMAGES = ['auction_5/1.jpeg', 'auction_5/2.jpeg', 'auction_5/3.jpeg', 'auction_5/4.jpeg'];
 
 const AuctionCard: React.FC<{ frame: number }> = ({ frame }) => {
   const active = Math.floor(frame / 40) % IMAGES.length;
@@ -234,7 +101,7 @@ const AuctionCard: React.FC<{ frame: number }> = ({ frame }) => {
       >
         <Img
           key={active}
-          src={staticFile(IMAGES[active])}
+          src={staticFile(ASSET(IMAGES[active]))}
           style={{
             maxWidth: '100%',
             maxHeight: '100%',
@@ -261,7 +128,7 @@ const AuctionCard: React.FC<{ frame: number }> = ({ frame }) => {
             }}
           >
             <Img
-              src={staticFile(img)}
+              src={staticFile(ASSET(img))}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
@@ -1363,40 +1230,38 @@ const Closing: React.FC = () => {
   );
 };
 
+export const TOTAL_FRAMES = VO_LEN.reduce((a, b) => a + b, 0);
+const SCENES: Array<React.FC> = [
+  Opening,
+  WhatIsAuction,
+  Preparation,
+  Wallet,
+  During,
+  AfterWinning,
+  Tips,
+  Closing,
+];
+
 export const AuctionExplainer: React.FC = () => (
   <CanvasElement id="AuctionExplainer">
     <Fill style={{ backgroundColor: SLATE_950 }}>
-      <Audio src={staticFile('vo/pad.mp3')} startFrom={0} endAt={4510} volume={0} />
+      <Audio
+        src={staticFile(`${VIDEO_ID}/vo/pad.mp3`)}
+        startFrom={0}
+        endAt={TOTAL_FRAMES}
+        volume={0}
+      />
       {VO_START.map((start, i) => (
         <Sequence key={i} from={start} durationInFrames={VO_LEN[i]}>
           <Audio src={staticFile(VO(i + 1))} startFrom={0} endAt={VO_LEN[i]} volume={1} />
         </Sequence>
       ))}
       <Series>
-        <Series.Sequence durationInFrames={466}>
-          <Opening />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={555}>
-          <WhatIsAuction />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={481}>
-          <Preparation />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={727}>
-          <Wallet />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={747}>
-          <During />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={582}>
-          <AfterWinning />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={553}>
-          <Tips />
-        </Series.Sequence>
-        <Series.Sequence durationInFrames={399}>
-          <Closing />
-        </Series.Sequence>
+        {SCENES.map((Scene, i) => (
+          <Series.Sequence key={i} durationInFrames={VO_LEN[i]}>
+            <Scene />
+          </Series.Sequence>
+        ))}
       </Series>
     </Fill>
   </CanvasElement>

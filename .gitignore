@@ -3,4 +3,4 @@ dist
 out
 .studio
 rendiv/
-public/vo/
+public/*/
