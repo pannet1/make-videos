@@ -4,6 +4,7 @@ import {
   CanvasElement,
   Fill,
   Img,
+  Sequence,
   Series,
   interpolate,
   spring,
@@ -13,7 +14,8 @@ import {
 import { staticFile } from '@rendiv/core';
 
 const VO = (n: number, ext = 'mp3'): string => `vo/${String(n).padStart(2, '0')}.${ext}`;
-const VO_END = [279, 793, 1263, 1943, 2694, 3079, 3472];
+const VO_START = [0, 450, 900, 1350, 2250, 2700, 3150];
+const VO_LEN = [279, 343, 363, 593, 444, 379, 322];
 
 const SLATE_950 = '#020617';
 const BLUE_500 = '#3b82f6';
@@ -1176,13 +1178,12 @@ const Closing: React.FC = () => {
 export const AuctionExplainer: React.FC = () => (
   <CanvasElement id="AuctionExplainer">
     <Fill style={{ backgroundColor: SLATE_950 }}>
-      <Audio src={staticFile(VO(1))} startFrom={0} endAt={VO_END[0]} volume={1} />
-      <Audio src={staticFile(VO(2))} startFrom={450} endAt={VO_END[1]} volume={1} />
-      <Audio src={staticFile(VO(3))} startFrom={900} endAt={VO_END[2]} volume={1} />
-      <Audio src={staticFile(VO(4))} startFrom={1350} endAt={VO_END[3]} volume={1} />
-      <Audio src={staticFile(VO(5))} startFrom={2250} endAt={VO_END[4]} volume={1} />
-      <Audio src={staticFile(VO(6))} startFrom={2700} endAt={VO_END[5]} volume={1} />
-      <Audio src={staticFile(VO(7))} startFrom={3150} endAt={VO_END[6]} volume={1} />
+      <Audio src={staticFile('vo/pad.mp3')} startFrom={0} endAt={3600} volume={0} />
+      {VO_START.map((start, i) => (
+        <Sequence key={i} from={start} durationInFrames={VO_LEN[i]}>
+          <Audio src={staticFile(VO(i + 1))} startFrom={0} endAt={VO_LEN[i]} volume={1} />
+        </Sequence>
+      ))}
       <Series>
         <Series.Sequence durationInFrames={450}>
           <Opening />
