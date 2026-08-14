@@ -16,7 +16,7 @@ const Root: React.FC = () => (
     <Composition
       id="AuctionExplainer"
       component={AuctionExplainer}
-      durationInFrames={3600}
+      durationInFrames={4510}
       fps={30}
       width={1920}
       height={1080}

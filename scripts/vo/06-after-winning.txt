@@ -1,0 +1,1 @@
+You won! Winning bid minus your wallet balance is the amount due. Scan the UPI QR code, pay the amount due before expiry, and upload your payment proof. Can't cover it at closing? A random user is selected instead.

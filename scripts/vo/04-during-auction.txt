@@ -1,1 +1,0 @@
-During the auction, click the blue Place Bid button. Your bid must be above the highest bid, and a multiple of one hundred rupees. Track the highest bid and total bids live. The auction ends at expiry; whoever holds the highest bid at close wins.

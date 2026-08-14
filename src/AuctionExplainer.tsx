@@ -14,8 +14,8 @@ import {
 import { staticFile } from '@rendiv/core';
 
 const VO = (n: number, ext = 'mp3'): string => `vo/${String(n).padStart(2, '0')}.${ext}`;
-const VO_START = [0, 450, 900, 1350, 2250, 2700, 3150];
-const VO_LEN = [279, 343, 363, 593, 444, 379, 322];
+const VO_START = [0, 466, 1021, 1502, 2229, 2976, 3558, 4111];
+const VO_LEN = [466, 555, 481, 727, 747, 582, 553, 399];
 
 const SLATE_950 = '#020617';
 const BLUE_500 = '#3b82f6';
@@ -342,7 +342,7 @@ const Opening: React.FC = () => {
           opacity: titleOpacity,
         }}
       >
-        Live Auctions
+        Online Auctions
       </div>
       <div
         style={{
@@ -633,6 +633,194 @@ const Preparation: React.FC = () => {
   );
 };
 
+const Wallet: React.FC = () => {
+  const frame = useFrame();
+  const fade = useFadeIn();
+  const cardRise = interpolate(frame, [20, 45], [40, 0], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const topUpFade = interpolate(frame, [90, 130], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const withdrawFade = interpolate(frame, [150, 190], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const noteFade = interpolate(frame, [220, 260], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const randomFade = interpolate(frame, [420, 470], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const balPulse = 1 + 0.02 * Math.sin(frame / 11);
+
+  return (
+    <Fill
+      style={{
+        backgroundColor: SLATE_950,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 100px',
+        gap: 90,
+        boxSizing: 'border-box',
+      }}
+    >
+      <NavBar />
+      <div style={{ flex: 1.15, opacity: fade }}>
+        <SectionHeader
+          title="Your Wallet"
+          subtitle="Fund anytime · Withdraw anytime"
+        />
+        <div
+          style={{
+            marginTop: 34,
+            fontSize: 30,
+            color: SLATE_300,
+            lineHeight: 1.6,
+            maxWidth: 760,
+            fontWeight: 500,
+          }}
+        >
+          Top up through{' '}
+          <span style={{ color: WHITE, fontWeight: 800 }}>UPI</span> anytime —
+          no expiry, no minimum, no lock-in. Withdraw your balance whenever you
+          like by requesting a withdrawal. Funds are never trapped.
+        </div>
+        <div
+          style={{
+            marginTop: 36,
+            padding: '22px 28px',
+            borderRadius: 14,
+            backgroundColor: 'rgba(250,204,21,0.1)',
+            border: `1px solid ${YELLOW_400}`,
+            fontSize: 26,
+            color: YELLOW_400,
+            fontWeight: 700,
+            maxWidth: 780,
+            opacity: noteFade,
+            lineHeight: 1.5,
+          }}
+        >
+          Your balance only matters when the auction is resolved.
+        </div>
+        <div
+          style={{
+            marginTop: 26,
+            padding: '20px 26px',
+            borderRadius: 14,
+            backgroundColor: 'rgba(96,165,250,0.1)',
+            border: `1px solid ${BLUE_400}`,
+            fontSize: 24,
+            color: BLUE_400,
+            fontWeight: 600,
+            maxWidth: 800,
+            opacity: randomFade,
+            lineHeight: 1.5,
+          }}
+        >
+          Keep enough balance — if the highest bidder can&apos;t cover their
+          bid at closing, a random participant with sufficient balance wins
+          instead.
+        </div>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          opacity: fade,
+          transform: `translateY(${cardRise}px)`,
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: 'rgba(15,23,42,0.5)',
+            backdropFilter: 'blur(24px)',
+            borderRadius: 16,
+            border: '1px solid rgba(30,41,59,0.5)',
+            padding: 32,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+              color: SLATE_400,
+            }}
+          >
+            Wallet Balance
+          </div>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 64,
+              fontWeight: 900,
+              color: WHITE,
+              fontVariantNumeric: 'tabular-nums',
+              transform: `scale(${balPulse})`,
+              transformOrigin: 'left center',
+            }}
+          >
+            {fmt(5000)}
+          </div>
+          <div
+            style={{
+              marginTop: 28,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div
+              style={{
+                padding: '20px 26px',
+                borderRadius: 12,
+                backgroundColor: GREEN_600,
+                opacity: topUpFade,
+              }}
+            >
+              <span style={{ color: WHITE, fontSize: 28, fontWeight: 800 }}>
+                Add Funds via UPI
+              </span>
+            </div>
+            <div
+              style={{
+                padding: '20px 26px',
+                borderRadius: 12,
+                backgroundColor: SLATE_800,
+                border: `1px solid ${SLATE_700}`,
+                opacity: withdrawFade,
+              }}
+            >
+              <span style={{ color: SLATE_300, fontSize: 28, fontWeight: 800 }}>
+                Request Withdrawal
+              </span>
+            </div>
+          </div>
+          <div
+            style={{
+              marginTop: 26,
+              padding: '16px 20px',
+              borderRadius: 12,
+              backgroundColor: 'rgba(74,222,128,0.1)',
+              border: `1px solid rgba(74,222,128,0.4)`,
+              fontSize: 22,
+              color: GREEN_400,
+              fontWeight: 700,
+            }}
+          >
+            No lock-in · no minimum · funds never trapped
+          </div>
+        </div>
+      </div>
+    </Fill>
+  );
+};
+
 const During: React.FC = () => {
   const frame = useFrame();
   const fade = useFadeIn();
@@ -766,7 +954,7 @@ const During: React.FC = () => {
               marginBottom: 18,
             }}
           >
-            Live tracking · updates in real time
+            Online tracking · updates in real time
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <StatTile
@@ -1146,7 +1334,7 @@ const Closing: React.FC = () => {
             fontWeight: 600,
           }}
         >
-          The current auction is live — go check it out!
+          The current auction is online — go check it out!
         </div>
         <div
           style={{
@@ -1178,32 +1366,35 @@ const Closing: React.FC = () => {
 export const AuctionExplainer: React.FC = () => (
   <CanvasElement id="AuctionExplainer">
     <Fill style={{ backgroundColor: SLATE_950 }}>
-      <Audio src={staticFile('vo/pad.mp3')} startFrom={0} endAt={3600} volume={0} />
+      <Audio src={staticFile('vo/pad.mp3')} startFrom={0} endAt={4510} volume={0} />
       {VO_START.map((start, i) => (
         <Sequence key={i} from={start} durationInFrames={VO_LEN[i]}>
           <Audio src={staticFile(VO(i + 1))} startFrom={0} endAt={VO_LEN[i]} volume={1} />
         </Sequence>
       ))}
       <Series>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={466}>
           <Opening />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={555}>
           <WhatIsAuction />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={481}>
           <Preparation />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={900}>
+        <Series.Sequence durationInFrames={727}>
+          <Wallet />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={747}>
           <During />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={582}>
           <AfterWinning />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={553}>
           <Tips />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={450}>
+        <Series.Sequence durationInFrames={399}>
           <Closing />
         </Series.Sequence>
       </Series>

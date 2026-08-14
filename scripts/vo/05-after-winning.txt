@@ -1,1 +1,0 @@
-You won! Winning bid minus wallet balance is the amount due. Pay via UPI before expiry. Can't cover it at closing? A random user is selected instead.
