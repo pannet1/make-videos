@@ -35,3 +35,14 @@ sudo usermod -aG docker $USER
 
 echo "Docker installation completed!"
 echo "Please restart your session or log out and back in to apply the Docker group changes."
+
+# --- Other prerequisites ---
+# The rendiv-video agent skill (already bundled at .opencode/skill/rendiv-video/)
+# must be loaded in your agent environment (pi / Claude Code / Codex) before
+# writing or editing rendiv compositions. It provides frame-driven animation
+# guidance, package import rules, and the rendiv CLI workflow.
+#
+# Additionally, the following are required for voiceover generation and timing:
+#   pip install uv     # or: pip install edge-tts  (Microsoft neural TTS)
+#   sudo apt-get install -y ffmpeg   # for audio muxing and duration probing
+#   python3            # already present on most Linux setups

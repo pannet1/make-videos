@@ -5,6 +5,65 @@ A small video studio for EcomSense explainer videos. Built on
 and FFmpeg stitching. Rendering runs inside a Docker container because
 Playwright Chromium only works in that environment on this machine.
 
+## Prerequisites
+
+Before you can create videos you need the following installed on your machine.
+The `./install-docker.sh` script handles Docker (section 1 below); the rest are
+quick one-liners.
+
+### 0. rendiv-video agent skill
+
+If you are using an agent (pi / Claude Code / Codex) to author rendiv
+compositions, load the **`rendiv-video`** skill first. It is already bundled at
+`.opencode/skill/` in this repo and provides frame-driven animation guidance,
+package import rules, and the rendiv CLI workflow.
+
+### 1. Docker
+
+Rendering happens inside a `node:20-bookworm` Docker container (Playwright
+Chromium doesn't run natively on this host). Install Docker with the helper
+script:
+
+```bash
+./install-docker.sh        # runs sudo apt-get … ; you execute it
+sudo usermod -aG docker $USER && newgrp $USER  # or log out / back in
+```
+
+Verify:
+
+```bash
+docker run --rm hello-world
+```
+
+### 2. Node.js dependencies (one-time)
+
+Dependencies are already vendored in `node_modules`. After cloning on a fresh
+machine:
+
+```bash
+npm ci
+```
+
+### 3. Audio tooling
+
+Voiceover generation requires:
+
+- **`ffmpeg` + `ffprobe`** — for audio muxing and duration probing.
+- **`uv`** (recommended) or **`edge-tts`** — Microsoft neural TTS voices,
+  free and no API key needed.
+
+```bash
+sudo apt-get install -y ffmpeg
+pip install uv            # or: pip install edge-tts
+```
+
+### 4. Python 3
+
+Used by `timings.sh` and `new-video.sh` for quick array maths. Should already
+be present on most Linux setups (`python3 --version`).
+
+---
+
 ## Layout
 
 One folder per video. All user-authored content lives under `videos/` and
@@ -12,6 +71,7 @@ One folder per video. All user-authored content lives under `videos/` and
 
 ```
 make-videos/
+├── install-docker.sh             # one-time Docker installer (needs sudo)
 ├── render.sh                     # ./render.sh COMPOSITION_ID [OUTPUT]
 ├── scripts/
 │   ├── generate-vo.sh            # ./scripts/generate-vo.sh <video-id> [VOICE]
