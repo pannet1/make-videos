@@ -4,3 +4,7 @@ out
 .studio
 rendiv/
 public/*/
+src/__ephemeral__.tsx
+src/videos/*
+!src/videos/demo/
+videos/*

@@ -51,9 +51,23 @@ for file in "${files[@]}"; do
   index="${base%%-*}"
   out="${OUT_DIR}/${index}.mp3"
   echo "Generating ${out} (${base})..."
-  run_edge_tts "$(cat "${file}")" "${out}"
-  dur="$(ffprobe -v error -show_entries format=duration \
-    -of default=noprint_wrappers=1:nokey=1 "${out}")"
+  attempt=1
+  dur=""
+  while true; do
+    if run_edge_tts "$(cat "${file}")" "${out}" && [[ -s "${out}" ]] && \
+       dur="$(ffprobe -v error -show_entries format=duration \
+         -of default=noprint_wrappers=1:nokey=1 "${out}" 2>/dev/null)" && \
+       [[ -n "${dur}" ]]; then
+      break
+    fi
+    if [[ ${attempt} -ge 3 ]]; then
+      echo "ERROR: failed to generate valid audio for ${file} after 3 attempts." >&2
+      echo "Check network access to the edge-tts service, then rerun: $0 ${VIDEO_ID} ${VOICE}" >&2
+      exit 1
+    fi
+    echo "Retrying ${base} (attempt $((attempt + 1)))..." >&2
+    attempt=$((attempt + 1))
+  done
   total_s="$(python3 -c "print(${total_s} + ${dur})")"
 done
 

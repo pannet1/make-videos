@@ -17,6 +17,11 @@ VOLUME_SRC="$(dirname "$PROJECT_DIR")"
 
 COMPOSITION="${1:-AuctionExplainer}"
 OUTPUT="${2:-out/auction-explainer.mp4}"
+ENTRY="${ENTRY:-src/index.tsx}"
+EXTRA_ARGS="${EXTRA_ARGS:-}"
+if [ -n "${CRF:-}" ]; then EXTRA_ARGS="$EXTRA_ARGS --crf ${CRF}"; fi
+if [ -n "${PRESET:-}" ]; then EXTRA_ARGS="$EXTRA_ARGS --preset ${PRESET}"; fi
+if [ -n "${CONCURRENCY:-}" ]; then EXTRA_ARGS="$EXTRA_ARGS --concurrency ${CONCURRENCY}"; fi
 
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
   docker start "${CONTAINER_NAME}" >/dev/null
@@ -25,11 +30,20 @@ else
     "${IMAGE}" sh -c "tail -f /dev/null" >/dev/null
 fi
 
+# Screen fonts for crisp text (one-time per container, marker persists).
+# Composition font stacks prefer Inter with system fallbacks, so a failed
+# install only costs quality, never a broken render.
+if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-fonts-done; then
+  docker exec "${CONTAINER_NAME}" sh -c \
+    "apt-get update -qq && apt-get install -y -qq fonts-inter fonts-liberation fontconfig" 2>&1 | tail -n 2 || true
+  docker exec "${CONTAINER_NAME}" touch /root/.rendiv-fonts-done || true
+fi
+
 # Work in the project dir and stdout/stderr wired through for live progress.
 # Uses the npm-published CLI (Playwright 1.62 / Chromium 1234). The browser
 # binaries and system deps are provisioned inside the container under
 # /root/.cache/ms-playwright — see the container bootstrap note.
 docker exec -w /workspace "${CONTAINER_NAME}" sh -c \
-  "node /workspace/node_modules/@rendiv/cli/dist/cli.js render src/index.tsx ${COMPOSITION} ${OUTPUT}" 2>&1 || true
+  "node /workspace/node_modules/@rendiv/cli/dist/cli.js render ${ENTRY} ${COMPOSITION} ${OUTPUT}${EXTRA_ARGS}" 2>&1 || true
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"

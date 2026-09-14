@@ -19,7 +19,7 @@ export const WHITE = '#ffffff';
 export const RED_400 = '#f87171';
 
 export const FONT =
-  'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
+  '"Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
 
 export const fmt = (n: number): string =>
   'Rs. ' + Math.round(n).toLocaleString('en-IN');
