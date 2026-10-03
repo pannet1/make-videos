@@ -18,6 +18,9 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 VIDEO_ID="${1:?usage: generate-vo.sh <video-id> [VOICE]}"
 VOICE="${2:-en-IN-PrabhatNeural}"
+# Set WRITE_SUBTITLES=1 to also emit word-timed <index>.srt files next to the
+# mp3s (same synthesis call, so timings align exactly). Used for caption tracks.
+WRITE_SUBTITLES="${WRITE_SUBTITLES:-0}"
 
 SRC_DIR="${PROJECT_DIR}/videos/${VIDEO_ID}/vo"
 ASSET_SRC="${PROJECT_DIR}/videos/${VIDEO_ID}/assets"
@@ -31,12 +34,18 @@ fi
 mkdir -p "${OUT_DIR}"
 
 run_edge_tts() {
-  local text="$1" out="$2"
+  local text="$1" out="$2" sub="$3"
+  local sub_args=()
+  if [[ "${WRITE_SUBTITLES}" == "1" && -n "${sub:-}" ]]; then
+    sub_args=(--write-subtitles "${sub}")
+  fi
   if command -v uv >/dev/null 2>&1; then
     uv tool run --from edge-tts edge-tts \
-      --voice "${VOICE}" --text "${text}" --write-media "${out}" >/dev/null 2>&1
+      --voice "${VOICE}" --text "${text}" --write-media "${out}" \
+      "${sub_args[@]}" >/dev/null 2>&1
   elif command -v edge-tts >/dev/null 2>&1; then
-    edge-tts --voice "${VOICE}" --text "${text}" --write-media "${out}"
+    edge-tts --voice "${VOICE}" --text "${text}" --write-media "${out}" \
+      "${sub_args[@]}"
   else
     echo "ERROR: no uv or edge-tts found on PATH." >&2
     exit 1
@@ -50,11 +59,12 @@ for file in "${files[@]}"; do
   base="$(basename "${file}" .txt)"
   index="${base%%-*}"
   out="${OUT_DIR}/${index}.mp3"
+  sub="${OUT_DIR}/${index}.srt"
   echo "Generating ${out} (${base})..."
   attempt=1
   dur=""
   while true; do
-    if run_edge_tts "$(cat "${file}")" "${out}" && [[ -s "${out}" ]] && \
+    if run_edge_tts "$(cat "${file}")" "${out}" "${sub}" && [[ -s "${out}" ]] && \
        dur="$(ffprobe -v error -show_entries format=duration \
          -of default=noprint_wrappers=1:nokey=1 "${out}" 2>/dev/null)" && \
        [[ -n "${dur}" ]]; then
