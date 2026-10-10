@@ -26,7 +26,7 @@ EXTRA_ARGS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --still) MODE="still"; OUTPUT="${OUTPUT%.mp4}.png" ;;
+    --still) MODE="still"; OUTPUT="${OUTPUT%.mp4}"; [[ "${OUTPUT}" != *.png ]] && OUTPUT="${OUTPUT}.png" ;;
     --frame) EXTRA_ARGS="$EXTRA_ARGS --frame $2"; shift ;;
     --crf) EXTRA_ARGS="$EXTRA_ARGS --crf $2"; shift ;;
     --preset) EXTRA_ARGS="$EXTRA_ARGS --preset $2"; shift ;;
