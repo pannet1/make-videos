@@ -8,21 +8,61 @@ set -euo pipefail
 # Usage:
 #   ./render.sh COMPOSITION_ID [OUTPUT]           # Render video
 #   ./render.sh COMPOSITION_ID [OUTPUT] --still   # Capture single frame (add --frame N)
+#   ./render.sh --draft [OUTPUT]                  # Rough draft: full Navaratri timeline
+#                                                 # at 960x540, cheapest encode — for
+#                                                 # fast inconsistency checks
 # Example:
 #   ./render.sh MyVideo out/my-video.mp4
 #   ./render.sh MyVideo out/frame.png --still --frame 90
+#   ./render.sh --draft out/navaratri-draft.mp4
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONTAINER_NAME="rendiv"
 IMAGE="node:20-bookworm"
 
-COMPOSITION="${1:?usage: render.sh COMPOSITION_ID [OUTPUT] [--still [--frame N]]}"
-shift
-OUTPUT="${1:-out/${COMPOSITION,,}.mp4}"
-shift || true
-ENTRY="${ENTRY:-src/index.tsx}"
+if [[ "${1:-}" == "--draft" ]]; then
+  shift
+  OUTPUT="${1:-out/navaratri-draft.mp4}"
+  [[ -n "${1:-}" ]] && shift || true
+  ENTRY_FILE="src/__ephemeral__.tsx"
+  trap 'rm -f "${PROJECT_DIR}/${ENTRY_FILE}"' EXIT
+  node -e "
+const fs = require('fs');
+const lines = [
+  \"import React from 'react';\",
+  \"import { setRootComponent, Composition } from '@rendiv/core';\",
+  \"import { TOTAL_FRAMES } from './theme';\",
+  \"import { NavaratriSadhana } from './NavaratriSadhana';\",
+  '',
+  'const Draft: React.FC = () => (',
+  '  <div style={{ width: 1920, height: 1080, transform: \\'scale(0.5)\\', transformOrigin: \\'top left\\' }}>',
+  '    <NavaratriSadhana />',
+  '  </div>',
+  ');',
+  '',
+  'const Root: React.FC = () => (',
+  '  <Composition id=\"NavaratriDraft\" component={Draft}',
+  '    durationInFrames={TOTAL_FRAMES} fps={30} width={960} height={540} />',
+  ');',
+  '',
+  'setRootComponent(Root);',
+  '',
+];
+fs.writeFileSync('$ENTRY_FILE', lines.join('\n'));
+console.log('draft entry: $ENTRY_FILE (960x540, removed on exit)');
+"
+  COMPOSITION="NavaratriDraft"
+  ENTRY="${ENTRY_FILE}"
+  EXTRA_ARGS="--concurrency 10 --image-format jpeg --jpeg-quality 60 --preset ultrafast --crf 30"
+else
+  COMPOSITION="${1:?usage: render.sh COMPOSITION_ID [OUTPUT] [--still [--frame N]]}"
+  shift
+  OUTPUT="${1:-out/${COMPOSITION,,}.mp4}"
+  shift || true
+  ENTRY="${ENTRY:-src/index.tsx}"
+  EXTRA_ARGS=""
+fi
 MODE="render"
-EXTRA_ARGS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
