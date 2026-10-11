@@ -1,4 +1,4 @@
-import { interpolate, useFrame } from '@rendiv/core';
+import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
 import { CinematicBackground, Eyebrow } from '../components/CinematicBackground';
 import { ProgressBar } from '../components/Chrome';
 import { ParticleField } from '../components/ParticleField';
@@ -36,6 +36,7 @@ export const Phase3: React.FC = () => {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
+      <Audio src={staticFile('navaratri-sadhana/vo/05.mp3')} />
       <CinematicBackground progress={fierce ? 0.72 : interpolate(frame, [2100, 3600], [0.72, 1])}>
         <ParticleField count={fierce ? 160 : 110} color={fierce ? '#F97316' : '#FDE68A'} maxSize={6} speed={fierce ? 2.2 : 0.7} />
       </CinematicBackground>

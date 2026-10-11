@@ -1,4 +1,4 @@
-import { interpolate, useFrame } from '@rendiv/core';
+import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
 import { CinematicBackground, Eyebrow, Hairline } from '../components/CinematicBackground';
 import { ChakraLadder, ProgressBar } from '../components/Chrome';
 import { ParticleField } from '../components/ParticleField';
@@ -25,6 +25,7 @@ export const HookIntro: React.FC = () => {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
+      <Audio src={staticFile('navaratri-sadhana/vo/01.mp3')} />
       <CinematicBackground progress={glow * 0.35}>
         <ParticleField count={110} color="#7DD3FC" maxSize={4} speed={0.7} />
         <SacredGeometry size={1000} opacity={0.16} />

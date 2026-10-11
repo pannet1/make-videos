@@ -1,4 +1,4 @@
-import { interpolate, useFrame } from '@rendiv/core';
+import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
 import { CinematicBackground, Eyebrow } from '../components/CinematicBackground';
 import { ParticleField } from '../components/ParticleField';
 import { SacredGeometry } from '../components/SacredGeometry';
@@ -19,6 +19,7 @@ export const Outro: React.FC = () => {
   const peak = interpolate(frame, [0, 1200], [0.7, 1]);
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
+      <Audio src={staticFile('navaratri-sadhana/vo/06.mp3')} />
       <CinematicBackground progress={peak}>
         <ParticleField count={130} color="#FFF7E6" maxSize={5} speed={0.8} />
         <SacredGeometry size={700} opacity={0.22} />

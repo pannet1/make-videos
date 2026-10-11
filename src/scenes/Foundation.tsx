@@ -1,4 +1,4 @@
-import { interpolate, useFrame } from '@rendiv/core';
+import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
 import { BlueFlame } from '../components/BlueFlame';
 import { CinematicBackground, Eyebrow } from '../components/CinematicBackground';
 import { LowerThird, ProgressBar } from '../components/Chrome';
@@ -22,6 +22,7 @@ export const Foundation: React.FC = () => {
   // words dissolve into flame one by one
   return (
     <div style={{ position: 'absolute', inset: 0, background: '#04060D' }}>
+      <Audio src={staticFile('navaratri-sadhana/vo/02.mp3')} />
       <CinematicBackground progress={0.12}>
         <ParticleField count={70} color="#38BDF8" maxSize={4} speed={1.2} />
       </CinematicBackground>

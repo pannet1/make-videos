@@ -1,4 +1,4 @@
-import { interpolate, useFrame } from '@rendiv/core';
+import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
 import { CinematicBackground, Eyebrow } from '../components/CinematicBackground';
 import { ProgressBar } from '../components/Chrome';
 import { ParticleField } from '../components/ParticleField';
@@ -45,6 +45,7 @@ export const Phase1: React.FC = () => {
   const activeCard = Math.min(2, Math.floor(frame / 1500));
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
+      <Audio src={staticFile('navaratri-sadhana/vo/03.mp3')} />
       <CinematicBackground progress={0.3}>
         <ParticleField count={80} color="#A78BFA" maxSize={4} speed={0.6} />
       </CinematicBackground>
