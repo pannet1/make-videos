@@ -1,157 +1,81 @@
 # make-videos
 
-A small video studio for EcomSense explainer videos. Built on
-[rendiv](https://opencode.ai) (React compositions) with edge-tts voiceovers
-and FFmpeg stitching. Rendering runs inside a Docker container because
-Playwright Chromium only works in that environment on this machine.
+Two ways to make a video. Everything else in this repo serves one of them.
 
-## Prerequisites
+- **A. From a prompt** — you describe the video; scenes are React code rendered
+  by Chromium in Docker (rendiv). Tamil/English AI voiceover included.
+- **B. From raw footage** — you drop camera clips in a folder; an agent cuts
+  them by reading the transcript. No API keys, all local FFmpeg.
 
-Before you can create videos you need the following installed on your machine.
-The `./install-docker.sh` script handles Docker (section 1 below); the rest are
-quick one-liners.
-
-### 0. rendiv-video agent skill
-
-If you are using an agent (pi / Claude Code / Codex) to author rendiv
-compositions, load the **`rendiv-video`** skill first. It is already bundled at
-`.opencode/skill/` in this repo and provides frame-driven animation guidance,
-package import rules, and the rendiv CLI workflow.
-
-### 1. Docker
-
-Rendering happens inside a `node:20-bookworm` Docker container (Playwright
-Chromium doesn't run natively on this host). Install Docker with the helper
-script:
+## Prereqs (once)
 
 ```bash
-./install-docker.sh        # runs sudo apt-get … ; you execute it
-sudo usermod -aG docker $USER && newgrp $USER  # or log out / back in
-```
-
-Verify:
-
-```bash
-docker run --rm hello-world
-```
-
-### 2. Node.js dependencies (one-time)
-
-Dependencies are already vendored in `node_modules`. After cloning on a fresh
-machine:
-
-```bash
-npm ci
-```
-
-### 3. Audio tooling
-
-Voiceover generation requires:
-
-- **`ffmpeg` + `ffprobe`** — for audio muxing and duration probing.
-- **`uv`** (recommended) or **`edge-tts`** — Microsoft neural TTS voices,
-  free and no API key needed.
-
-```bash
+./install-docker.sh        # Docker; you run it (needs sudo)
+npm ci                     # node deps
 sudo apt-get install -y ffmpeg
-pip install uv            # or: pip install edge-tts
+pip install uv             # for edge-tts voiceover + faster-whisper transcription
+docker exec rendiv sh -c "cd /workspace && ./node_modules/.bin/playwright install chromium"  # browsers, once
 ```
 
-### 4. Python 3
+## A. Video from a prompt
 
-Used by `timings.sh` and `new-video.sh` for quick array maths. Should already
-be present on most Linux setups (`python3 --version`).
+```bash
+./scripts/new-video.sh <video-id> <CompositionName>   # scaffold
+# 1. write narration: videos/<video-id>/vo/NN-name.txt (one file per chapter)
+# 2. drop images/music: videos/<video-id>/assets/
+./scripts/generate-vo.sh <video-id>                   # Tamil/English AI voiceover → public/<video-id>/vo/
+./scripts/timings.sh <video-id>                       # prints VO_START/VO_LEN → paste into composition
+# 3. build scenes: src/videos/<video-id>/<CompositionName>.tsx (load the rendiv-video skill first)
+./render.sh <CompositionName> --still                 # verify a frame (fast)
+./render.sh <CompositionName> --draft                 # rough draft, 960x540 (NavaratriSadhana only)
+./render.sh <CompositionName>                         # production master, 1920x1080 (you run it)
+```
 
----
+## B. Video from raw footage
+
+```bash
+./scripts/ingest.sh <video-id> <clip>...              # normalize to 1080p30, wav, contact sheets
+./scripts/transcribe.sh <video-id>                    # word-level transcript (or --srt file to skip)
+# 1. agent writes videos/<video-id>/edit/edl.json from the transcript — YOU approve it
+./scripts/cut.sh <video-id> videos/<video-id>/edit/edl.json        # trims, speed, pop-free joints
+./scripts/qc.sh <video-id> videos/<video-id>/edit/cut.mp4 videos/<video-id>/edit/edl.json  # checks + joint stills
+./scripts/generate-vo.sh <video-id>                   # optional narration (same as mode A)
+./scripts/assemble.sh <video-id> --burn               # VO mix, captions, final.mp4 + thumb.png
+```
+
+`edit/edl.json` format: `{"cuts": [{"src": "edit/norm-take1.mp4", "ss": 1.2, "to": 10.5, "speed": 1.0}]}` — times in seconds, `speed` optional (0.25–4.0).
+
+## Cheat sheet
+
+| Want | Command |
+|---|---|
+| New prompt-made video | `./scripts/new-video.sh <id> <Name>` |
+| Voiceover (Tamil default `ta-IN-ValluvarNeural`) | `./scripts/generate-vo.sh <id> [VOICE]` |
+| Scene timings from VO | `./scripts/timings.sh <id>` |
+| Verify one frame | `./render.sh <Composition> --still [--frame N]` |
+| Rough draft | `./render.sh <Composition> --draft` |
+| Production master | `./render.sh <Composition>` |
+| Ingest footage | `./scripts/ingest.sh <id> <clips...>` |
+| Transcribe | `./scripts/transcribe.sh <id> [--srt file]` |
+| Cut approved EDL | `./scripts/cut.sh <id> edit/edl.json` |
+| Check a cut | `./scripts/qc.sh <id> edit/cut.mp4 edit/edl.json` |
+| Final file + thumbnail | `./scripts/assemble.sh <id> [--burn] [--no-vo]` |
 
 ## Layout
 
-One folder per video. All user-authored content lives under `videos/` and
-`src/videos/`; everything under `public/<video-id>/` is generated.
-
 ```
-make-videos/
-├── install-docker.sh             # one-time Docker installer (needs sudo)
-├── render.sh                     # ./render.sh COMPOSITION_ID [OUTPUT]
-├── scripts/
-│   ├── generate-vo.sh            # ./scripts/generate-vo.sh <video-id> [VOICE]
-│   ├── timings.sh                # ./scripts/timings.sh <video-id>
-│   ├── ingest.sh                 # raw footage in (probe/normalize/wav/sheets)
-│   ├── transcribe.sh             # word-level transcript (whisper or --srt)
-│   ├── cut.sh                    # EDL trim/speed/concat, pop-free joints
-│   ├── qc.sh                     # duration/loudness/joint-stills/dead-air
-│   ├── assemble.sh               # VO mix, captions, final.mp4 + thumb
-│   └── new-video.sh              # ./scripts/new-video.sh <video-id> <Name>
-├── videos/<video-id>/            # per-video source (committed)
-│   ├── spec.md                   # narration/chapter spec (source of truth)
-│   ├── vo/NN-name.txt            # one narration script per chapter
-│   └── assets/                   # images, music (committed)
-├── src/
-│   ├── index.tsx                 # registers all compositions
-│   ├── shared/theme.tsx          # brand + reusable UI (NavBar, tiles, colors)
-│   └── videos/<video-id>/        # composition code, one file per video
-├── public/<video-id>/            # generated (gitignored)
-│   ├── vo/NN.mp3, pad.mp3        # produced by generate-vo.sh
-│   └── assets/                   # synced from videos/<video-id>/assets
-└── out/                          # rendered mp4s (gitignored)
+videos/<video-id>/   sources/ (raw clips) · vo/NN-*.txt (narration source)
+                     assets/ (images/music) · spec.md · edit/ (transcripts,
+                     EDL, cuts, qc stills, final.mp4 — all local work files)
+src/                 index.tsx (registers compositions) · shared/ ·
+                     videos/<id>/ (prompt-made scene code) · scenes/, components/
+public/<video-id>/   generated: vo/*.mp3, photos, assets (gitignored, regenerable)
+out/                 renders (gitignored)
 ```
 
-## Making a new video
+## Rules
 
-Two modes — prompt-made (rendiv compositions) and raw footage (camera/screen
-clips edited by transcript). Both share the `videos/<video-id>/` layout, the
-`generate-vo.sh` voiceover pipeline, and `captions.srt` subtitles.
-
-### A. From a prompt (generated visuals)
-
-1. **Scaffold:** `./scripts/new-video.sh <video-id> <CompositionName>`
-   (e.g. `./scripts/new-video.sh how-bidding-works HowBiddingWorks`). Creates
-   `videos/<video-id>/` (spec stub + vo + assets) and a registered
-   composition in `src/videos/<video-id>/`.
-2. **Write the spec:** fill in `videos/<video-id>/spec.md` with the chapters.
-3. **Write narration:** one file per chapter in `videos/<video-id>/vo/`,
-   numbered `NN-name.txt` in order.
-4. **Drop assets:** put images/music into `videos/<video-id>/assets/`.
-5. **Generate voiceover:** `./scripts/generate-vo.sh <video-id>` produces the
-   mp3s, a silence `pad.mp3`, and syncs assets into `public/<video-id>/`.
-6. **Get timings:** `./scripts/timings.sh <video-id>` prints
-   `VO_START`/`VO_LEN` (30fps, 8-frame scene pad). Paste these into the
-   composition.
-7. **Build the scenes:** edit the composition in `src/videos/<video-id>/`.
-   Reference assets as `staticFile(\`${VIDEO_ID}/assets/...\`)` and VO as
-   `staticFile(\`${VIDEO_ID}/vo/NN.mp3\`)`.
-8. **Preview:** render a still with the published CLI inside Docker to
-   sanity-check a frame, then hand the full render to the user:
-   `./render.sh <CompositionName> out/<video-id>.mp4`.
-
-### B. From raw footage (edit by prompt)
-
-1. **Ingest:** `./scripts/ingest.sh <video-id> <clip>...` — normalize to
-   1080p30, transcription wav, contact sheets.
-2. **Transcribe:** `./scripts/transcribe.sh <video-id>` (faster-whisper,
-   word-level) or `--srt` to import captions.
-3. **Propose + approve:** agent writes `edit/edl.json` from the transcript;
-   human OKs it.
-4. **Cut:** `./scripts/cut.sh <video-id> edit/edl.json` — trims, speed ramps,
-   pop-free joints.
-5. **QC:** `./scripts/qc.sh <video-id> edit/cut.mp4 edit/edl.json` — duration
-   assert, loudness, joint stills, dead-air scan.
-6. **Assemble:** `./scripts/assemble.sh <video-id> --burn` — VO mix, captions,
-   `final.mp4` + thumbnail.
-
-Full method: `docs/raw-footage.md`. No API keys in this path; the only
-download is the faster-whisper model (~150MB, once).
-
-## Voiceover voice
-
-Default `en-IN-PrabhatNeural` (friendly Indian English). Override per video:
-`./scripts/generate-vo.sh <video-id> en-US-GuyNeural`.
-
-## Notes
-
-- `VO_START`/`VO_LEN` are authoritative for scene lengths — the composition
-  total and the Series durations are derived from them, so keep the arrays in
-  sync with `./scripts/timings.sh`.
-- Scene animation timing inside each scene is relative to the scene start
-  (`useFrame`), so scenes are reusable across videos.
-- `public/*/` is gitignored — generated assets never enter the repo.
+- `out/` and `public/*/` are generated — never commit them (Navaratri media was force-added once as an exception; don't repeat it).
+- The EDL and the full render are human-approved steps: agent proposes, you run.
+- Photo/music credits go in `videos/<video-id>/README.md` and the YouTube description (most Commons files are CC BY-SA, attribution required).
+- Transcription downloads a ~150MB model on first use; everything else is offline.
