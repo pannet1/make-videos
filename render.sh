@@ -52,7 +52,7 @@ elif [[ "${DRAFT}" == "1" ]]; then
   fi
   OUTPUT="out/${COMPOSITION,,}-draft.mp4"
   ENTRY_FILE="src/__ephemeral__.tsx"
-  trap 'rm -f "${PROJECT_DIR}/${ENTRY_FILE}"' EXIT
+  CLEANUP_EPHEMERAL=1
   node -e "
 const fs = require('fs');
 const lines = [
@@ -80,9 +80,9 @@ console.log('draft entry: $ENTRY_FILE (960x540, removed on exit)');
 "
   COMPOSITION="NavaratriDraft"
   ENTRY="${ENTRY_FILE}"
-  EXTRA_ARGS="--concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 60 --preset ultrafast --crf 30"
+  EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 60 --preset ultrafast --crf 30"
 else
-  EXTRA_ARGS="--concurrency ${CONCURRENCY} --image-format png --preset medium --crf 16"
+  EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format png --preset medium --crf 16"
 fi
 
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -100,5 +100,9 @@ fi
 
 CMD="node /workspace/node_modules/@rendiv/cli/dist/cli.js ${MODE} ${ENTRY} ${COMPOSITION} ${OUTPUT}${EXTRA_ARGS}"
 docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}" 2>&1 || true
+
+if [[ "${CLEANUP_EPHEMERAL:-0}" == "1" ]]; then
+  rm -f "${PROJECT_DIR}/${ENTRY_FILE}"
+fi
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"
