@@ -12,6 +12,19 @@
 - VO audio: `public/navaratri-sadhana/vo/*.mp3` (edge-tts `ta-IN-ValluvarNeural`)
 - Subtitles: `videos/navaratri-sadhana/captions.srt` (Tamil, upload in YouTube Studio)
 - Script: `videos/navaratri-sadhana/VOICEOVER_SCRIPT.md`
+- Photos: `public/navaratri-sadhana/photos/` (slideshow stills, slow Ken Burns drift)
+
+## Photo credits (paste into YouTube description)
+
+- Sunrise: Basile Morin, CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Mountains_clouds_Mekong_and_dwellings_from_Mount_Phou_Si_at_sunrise_in_Luang_Prabang_Laos.jpg
+- Diyas: Sneha G Gupta, CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Rows_of_diyas.jpg
+- Journal: Thought Catalog (Unsplash), CC0 — https://commons.wikimedia.org/wiki/File:Journaling_over_coffee_(Unsplash).jpg
+- Meditating yogi: Vyacheslav Argenberg, CC BY 4.0 — https://commons.wikimedia.org/wiki/File:Banyan_tree_in_meditation,_Yogi_in_meditation,_Paliem,_Goa,_India.jpg
+- Seed: Amada44, public domain — https://commons.wikimedia.org/wiki/File:Date_Seed_sprouting.jpg
+- Devotees: DesiBoy101, CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Devotees_praying_at_the_Panchmukhi_Maruti_Temple,_Pune.jpg
+- Big Temple sunrise: MADHURANTHAKAN JAGADEESAN, CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:N-TN-C192_Sunrise-Perspective-of-BigTemple.jpg
+- Thanjavur temple: KARTY JazZ, CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:1000_years_Old_Thanjavur_Brihadeeshwara_Temple_View_at_Sunrise.jpg
+- Kalaratri: early 19th century, via British Museum, public domain — https://commons.wikimedia.org/wiki/File:Kalaratri.jpg
 
 ## Regenerate voiceover
 
