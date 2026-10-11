@@ -76,6 +76,11 @@ make-videos/
 ├── scripts/
 │   ├── generate-vo.sh            # ./scripts/generate-vo.sh <video-id> [VOICE]
 │   ├── timings.sh                # ./scripts/timings.sh <video-id>
+│   ├── ingest.sh                 # raw footage in (probe/normalize/wav/sheets)
+│   ├── transcribe.sh             # word-level transcript (whisper or --srt)
+│   ├── cut.sh                    # EDL trim/speed/concat, pop-free joints
+│   ├── qc.sh                     # duration/loudness/joint-stills/dead-air
+│   ├── assemble.sh               # VO mix, captions, final.mp4 + thumb
 │   └── new-video.sh              # ./scripts/new-video.sh <video-id> <Name>
 ├── videos/<video-id>/            # per-video source (committed)
 │   ├── spec.md                   # narration/chapter spec (source of truth)
@@ -92,6 +97,12 @@ make-videos/
 ```
 
 ## Making a new video
+
+Two modes — prompt-made (rendiv compositions) and raw footage (camera/screen
+clips edited by transcript). Both share the `videos/<video-id>/` layout, the
+`generate-vo.sh` voiceover pipeline, and `captions.srt` subtitles.
+
+### A. From a prompt (generated visuals)
 
 1. **Scaffold:** `./scripts/new-video.sh <video-id> <CompositionName>`
    (e.g. `./scripts/new-video.sh how-bidding-works HowBiddingWorks`). Creates
@@ -112,6 +123,24 @@ make-videos/
 8. **Preview:** render a still with the published CLI inside Docker to
    sanity-check a frame, then hand the full render to the user:
    `./render.sh <CompositionName> out/<video-id>.mp4`.
+
+### B. From raw footage (edit by prompt)
+
+1. **Ingest:** `./scripts/ingest.sh <video-id> <clip>...` — normalize to
+   1080p30, transcription wav, contact sheets.
+2. **Transcribe:** `./scripts/transcribe.sh <video-id>` (faster-whisper,
+   word-level) or `--srt` to import captions.
+3. **Propose + approve:** agent writes `edit/edl.json` from the transcript;
+   human OKs it.
+4. **Cut:** `./scripts/cut.sh <video-id> edit/edl.json` — trims, speed ramps,
+   pop-free joints.
+5. **QC:** `./scripts/qc.sh <video-id> edit/cut.mp4 edit/edl.json` — duration
+   assert, loudness, joint stills, dead-air scan.
+6. **Assemble:** `./scripts/assemble.sh <video-id> --burn` — VO mix, captions,
+   `final.mp4` + thumbnail.
+
+Full method: `docs/raw-footage.md`. No API keys in this path; the only
+download is the faster-whisper model (~150MB, once).
 
 ## Voiceover voice
 

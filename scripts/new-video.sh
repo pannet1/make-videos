@@ -17,7 +17,7 @@ VIDEO_DIR="${PROJECT_DIR}/videos/${VIDEO_ID}"
 SRC_DIR="${PROJECT_DIR}/src/videos/${VIDEO_ID}"
 INDEX="${PROJECT_DIR}/src/index.tsx"
 
-mkdir -p "${VIDEO_DIR}/vo" "${VIDEO_DIR}/assets" "${SRC_DIR}"
+mkdir -p "${VIDEO_DIR}/vo" "${VIDEO_DIR}/assets" "${VIDEO_DIR}/sources" "${VIDEO_DIR}/edit" "${SRC_DIR}"
 
 if [[ ! -f "${VIDEO_DIR}/spec.md" ]]; then
   cat > "${VIDEO_DIR}/spec.md" <<EOF
