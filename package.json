@@ -8,9 +8,9 @@
     "render": "rendiv render src/index.tsx MyVideo out/my-video.mp4",
     "still": "rendiv still src/index.tsx MyVideo out/still.png",
     "compositions": "rendiv compositions src/index.tsx",
-    "render:navaratri": "./render.sh NavaratriSadhana out/navaratri-sadhana.mp4 --concurrency 8 --preset medium --crf 16",
-    "render:navaratri-draft": "./render.sh NavaratriSadhana out/navaratri-draft.mp4 --concurrency 8 --preset ultrafast --crf 28",
-    "still:navaratri-thumb": "./render.sh NavaratriThumbnail out/thumbnail.png --still"
+    "render:navaratri": "./render.sh NavaratriSadhana",
+    "render:navaratri-draft": "./render.sh NavaratriSadhana --draft",
+    "still:navaratri-thumb": "./render.sh NavaratriThumbnail --still"
   },
   "dependencies": {
     "@rendiv/core": "^0.2.0",

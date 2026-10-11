@@ -1,12 +1,12 @@
 # navaratri-sadhana — The Ultimate Navaratri Sadhana (Tamil, 10:30)
 
-10:30 · 1920×1080 · 30fps · 18,900 frames. Tamil voiceover, English on-screen text.
+10:30 · 1920×1080 · 30fps · 18,900 frames. Tamil voiceover, symbolic visuals, no on-screen text.
 
 ## Layout
 
 - Scenes: `src/scenes/` (HookIntro, Foundation, Phase1, Phase2, Phase3, Outro)
 - Shared visuals: `src/components/`, `src/theme.ts`
-- Master timeline: `src/NavaratriSadhana.tsx` (one `<Audio>` per act)
+- Master timeline: `src/NavaratriSadhana.tsx` (VO lives inside each scene)
 - Thumbnail still: `src/Thumbnail.tsx` (Kalaratri, Day 7 Navadurga, public domain)
 - VO source: `videos/navaratri-sadhana/vo/*.txt`
 - VO audio: `public/navaratri-sadhana/vo/*.mp3` (edge-tts `ta-IN-ValluvarNeural`)
@@ -29,7 +29,18 @@ Durations must stay under scene budgets: 90 / 90 / 150 / 120 / 120 / 60s.
 ## Render (Docker — never run long renders from an agent)
 
 ```bash
-./render.sh Thumbnail out/thumbnail.png --still   # verify still
-./render.sh NavaratriSadhana out/navaratri-draft.mp4 --concurrency 8 --preset ultrafast --crf 28   # rough draft
-./render.sh NavaratriSadhana out/navaratri-sadhana.mp4 --concurrency 8 --preset medium --crf 16    # production master
+./render.sh NavaratriThumbnail --still   # verify still
+./render.sh NavaratriSadhana --draft     # rough draft (960x540, fast)
+./render.sh NavaratriSadhana             # production master (1920x1080)
+```
+
+Act spot-checks (visual + VO, minutes each):
+
+```bash
+./render.sh NavaratriHook
+./render.sh NavaratriFoundation
+./render.sh NavaratriPhase1
+./render.sh NavaratriPhase2
+./render.sh NavaratriPhase3
+./render.sh NavaratriOutro
 ```
