@@ -1,19 +1,24 @@
 import { Audio, interpolate, staticFile, useFrame } from '@rendiv/core';
-import { CinematicBackground, Eyebrow } from '../components/CinematicBackground';
+import { CinematicBackground } from '../components/CinematicBackground';
 import { ParticleField } from '../components/ParticleField';
 import { SacredGeometry } from '../components/SacredGeometry';
-import { BodyCopy, Headline, SceneCaptions } from '../components/Type';
 import React from 'react';
 
-const CUES = [
-  { from: 0, to: 600, text: 'Clear the past. Build energy. Plant the seed.' },
-  { from: 600, to: 1100, text: 'Take fierce action. Then receive perfection.' },
-  { from: 1100, to: 1800, text: 'Which day of the Sadhana feels most challenging for you?' },
-];
+/** Play triangle glyph (pure shape). */
+const PlayGlyph: React.FC<{ size: number; color: string }> = ({ size, color }) => (
+  <div
+    style={{
+      width: 0,
+      height: 0,
+      borderTop: `${size * 0.55}px solid transparent`,
+      borderBottom: `${size * 0.55}px solid transparent`,
+      borderLeft: `${size}px solid ${color}`,
+      marginLeft: size * 0.25,
+    }}
+  />
+);
 
-const STEPS = ['Clear past', 'Build energy', 'Plant seed', 'Fierce action', 'Receive'];
-
-/** 9:30–10:30 · Outro & CTA (1800 frames) */
+/** 9:30–10:30 · Outro — five lights, sunrise, wordless end cards. No text. */
 export const Outro: React.FC = () => {
   const frame = useFrame();
   const peak = interpolate(frame, [0, 1200], [0.7, 1]);
@@ -25,81 +30,110 @@ export const Outro: React.FC = () => {
         <SacredGeometry size={700} opacity={0.22} />
       </CinematicBackground>
 
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 140px' }}>
-        <Eyebrow text="The progression · Tamas → Rajas → Sattva" color="#FDE68A" />
-        <div style={{ height: 20 }} />
-        <Headline enterAt={60} size={84} align="center">
-          Clear. Energize. Plant. Act. Receive.
-        </Headline>
-
-        {/* 5-step recap pills */}
-        <div style={{ display: 'flex', gap: 14, marginTop: 34 }}>
-          {STEPS.map((s, i) => {
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 60,
+        }}
+      >
+        {/* five-step light progression */}
+        <div style={{ display: 'flex', gap: 30 }}>
+          {[0, 1, 2, 3, 4].map((i) => {
             const e = interpolate(frame - (250 + i * 130), [0, 24], [0, 1], {
               extrapolateLeft: 'clamp',
               extrapolateRight: 'clamp',
             });
             return (
               <div
-                key={s}
+                key={i}
                 style={{
-                  opacity: e,
-                  fontSize: 25,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  color: '#0A0E1A',
-                  background: 'linear-gradient(180deg, #FFFBEB, #FDE68A)',
-                  padding: '14px 26px',
-                  borderRadius: 999,
-                  boxShadow: '0 0 24px rgba(253,230,138,0.5)',
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  opacity: 0.25 + e * 0.75,
+                  background:
+                    e >= 1
+                      ? 'radial-gradient(circle, #FFFBEB, #FDE68A 60%, #B45309)'
+                      : 'rgba(255,247,230,0.15)',
+                  border: '2px solid rgba(253,230,138,0.6)',
+                  boxShadow: e >= 1 ? '0 0 30px rgba(253,230,138,0.9)' : 'none',
                 }}
-              >
-                {i + 1} · {s}
-              </div>
+              />
             );
           })}
         </div>
-
-        <div style={{ height: 26 }} />
-        <BodyCopy enterAt={1050} maxWidth={1000}>
-          Which day of the Sadhana feels most challenging for you right now? Tell us below —
-          and subscribe for more deep dives into esoteric yogic science.
-        </BodyCopy>
-
-        {/* end-screen edge cards */}
-        <div style={{ position: 'absolute', left: 110, bottom: 120, display: 'flex', gap: 18 }}>
-          {['▶ Next: Kundalini 101', '▶ Mantra Science'].map((t, i) => {
-            const e = interpolate(frame - (1200 + i * 140), [0, 24], [0, 1], {
-              extrapolateLeft: 'clamp',
-              extrapolateRight: 'clamp',
-            });
-            return (
-              <div key={t} style={{ opacity: e, fontSize: 24, color: '#FFF7E6', background: 'rgba(5,7,15,0.65)', border: '1px solid rgba(255,247,230,0.25)', padding: '16px 24px', borderRadius: 14 }}>
-                {t}
-              </div>
-            );
-          })}
-        </div>
+        {/* radiant core */}
         <div
           style={{
-            position: 'absolute',
-            right: 110,
-            bottom: 120,
-            opacity: interpolate(frame - 1250, [0, 24], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }),
-            fontSize: 28,
-            fontWeight: 800,
-            letterSpacing: 2,
-            color: '#fff',
-            background: '#C81E1E',
-            padding: '18px 42px',
-            borderRadius: 999,
+            width: 260,
+            height: 260,
+            borderRadius: '50%',
+            opacity: interpolate(frame - 800, [0, 300], [0, 1], {
+              extrapolateLeft: 'clamp',
+              extrapolateRight: 'clamp',
+            }),
+            background:
+              'radial-gradient(circle at 45% 40%, #FFFFFF 0%, #FFFBEB 30%, #FDE68A 60%, transparent 75%)',
+            filter: 'blur(4px)',
+            boxShadow: '0 0 120px rgba(253,230,138,0.8)',
           }}
-        >
-          ● SUBSCRIBE
-        </div>
+        />
       </div>
 
-      <SceneCaptions cues={CUES} />
+      {/* wordless end-screen panels */}
+      <div style={{ position: 'absolute', left: 110, bottom: 120, display: 'flex', gap: 18 }}>
+        {[0, 1].map((i) => {
+          const e = interpolate(frame - (1200 + i * 140), [0, 24], [0, 1], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          });
+          return (
+            <div
+              key={i}
+              style={{
+                opacity: e,
+                width: 300,
+                height: 170,
+                borderRadius: 14,
+                background: `linear-gradient(135deg, rgba(26,35,80,0.9), rgba(180,83,9,0.55))`,
+                border: '1px solid rgba(255,247,230,0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <PlayGlyph size={44} color="rgba(255,247,230,0.9)" />
+            </div>
+          );
+        })}
+      </div>
+      {/* wordless subscribe orb */}
+      <div
+        style={{
+          position: 'absolute',
+          right: 130,
+          bottom: 130,
+          width: 130,
+          height: 130,
+          borderRadius: '50%',
+          opacity: interpolate(frame - 1250, [0, 24], [0, 1], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          }),
+          background: 'radial-gradient(circle at 40% 35%, #F87171, #C81E1E 70%)',
+          boxShadow: '0 0 40px rgba(200,30,30,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <PlayGlyph size={40} color="#fff" />
+      </div>
     </div>
   );
 };
