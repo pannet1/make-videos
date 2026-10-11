@@ -9,13 +9,16 @@
 # Example:
 #   ./scripts/draft.sh out/navaratri-draft.mp4
 #
-# For spot-checking one act only, use frame ranges instead (full res, fast):
-#   Hook        0-2700        ./render.sh NavaratriSadhana out/hook.mp4 --frames 0-2700 --concurrency 10 --preset ultrafast --crf 30
-#   Foundation  2700-5400     ./render.sh NavaratriSadhana out/foundation.mp4 --frames 2700-5400 --concurrency 10 --preset ultrafast --crf 30
-#   Phase 1     5400-9900     ./render.sh NavaratriSadhana out/phase1.mp4 --frames 5400-9900 --concurrency 10 --preset ultrafast --crf 30
-#   Phase 2     9900-13500    ./render.sh NavaratriSadhana out/phase2.mp4 --frames 9900-13500 --concurrency 10 --preset ultrafast --crf 30
-#   Phase 3     13500-17100   ./render.sh NavaratriSadhana out/phase3.mp4 --frames 13500-17100 --concurrency 10 --preset ultrafast --crf 30
-#   Outro       17100-18900   ./render.sh NavaratriSadhana out/outro.mp4 --frames 17100-18900 --concurrency 10 --preset ultrafast --crf 30
+# For spot-checking one act only, render its standalone composition
+# (NOTE: --frames on the master does NOT work — this renderer numbers files
+# by absolute frame, so stitching finds nothing. Per-scene comps start at 0.)
+#   Hook        ./render.sh NavaratriHook out/hook.mp4 --concurrency 10 --preset ultrafast --crf 30
+#   Foundation  ./render.sh NavaratriFoundation out/foundation.mp4 --concurrency 10 --preset ultrafast --crf 30
+#   Phase 1     ./render.sh NavaratriPhase1 out/phase1.mp4 --concurrency 10 --preset ultrafast --crf 30
+#   Phase 2     ./render.sh NavaratriPhase2 out/phase2.mp4 --concurrency 10 --preset ultrafast --crf 30
+#   Phase 3     ./render.sh NavaratriPhase3 out/phase3.mp4 --concurrency 10 --preset ultrafast --crf 30
+#   Outro       ./render.sh NavaratriOutro out/outro.mp4 --concurrency 10 --preset ultrafast --crf 30
+# (Spot-checks are visual-only: VO <Audio> lives on the master timeline.)
 #
 set -euo pipefail
 cd "$(dirname "$0")/.."
