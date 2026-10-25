@@ -82,7 +82,7 @@ console.log('draft entry: $ENTRY_FILE (960x540, removed on exit)');
   ENTRY="${ENTRY_FILE}"
   EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 60 --preset ultrafast --crf 30"
 else
-  EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format png --preset medium --crf 16"
+  EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 85 --preset faster --crf 20"
 fi
 
 if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -92,6 +92,15 @@ else
     "${IMAGE}" sh -c "tail -f /dev/null" >/dev/null
 fi
 
+if [[ "${CLEANUP_EPHEMERAL:-0}" == "1" ]]; then
+  trap 'rm -f "${PROJECT_DIR}/${ENTRY_FILE}"' EXIT
+fi
+
+if ! docker exec "${CONTAINER_NAME}" test -f /workspace/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/ffmpeg; then
+  docker exec "${CONTAINER_NAME}" sh -c \
+    "node /workspace/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/install.js"
+fi
+
 if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-fonts-done; then
   docker exec "${CONTAINER_NAME}" sh -c \
     "apt-get update -qq && apt-get install -y -qq fonts-inter fonts-liberation fontconfig" 2>&1 | tail -n 2 || true
@@ -99,10 +108,6 @@ if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-fonts-done; then
 fi
 
 CMD="node /workspace/node_modules/@rendiv/cli/dist/cli.js ${MODE} ${ENTRY} ${COMPOSITION} ${OUTPUT}${EXTRA_ARGS}"
-docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}" 2>&1 || true
-
-if [[ "${CLEANUP_EPHEMERAL:-0}" == "1" ]]; then
-  rm -f "${PROJECT_DIR}/${ENTRY_FILE}"
-fi
+docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}"
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"

@@ -1,23 +1,26 @@
-import { CanvasElement, Series } from '@rendiv/core';
+import { Audio, CanvasElement, Series, staticFile } from '@rendiv/core';
 import React from 'react';
-import { frames } from './theme';
+import { frames, SEGMENTS, TOTAL_FRAMES } from './theme';
 import { HookIntro } from './scenes/HookIntro';
 import { Foundation } from './scenes/Foundation';
 import { Phase1 } from './scenes/Phase1';
 import { Phase2 } from './scenes/Phase2';
 import { Phase3 } from './scenes/Phase3';
 import { Outro } from './scenes/Outro';
-import { SEGMENTS } from './theme';
 
 /**
- * Master 10:30 timeline — 6 back-to-back acts.
- * Voiceover lives INSIDE each scene (edge-tts ta-IN-ValluvarNeural, Tamil),
- * so standalone per-scene compositions render with sound too.
- * Source: videos/navaratri-sadhana/vo/*.txt
- * Audio:  public/navaratri-sadhana/vo/*.mp3
+ * Master timeline — 6 back-to-back acts.
+ * Audio:  voiceover inside each scene + continuous 432Hz ambient meditation pad.
  */
 export const NavaratriSadhana: React.FC = () => (
   <CanvasElement id="NavaratriSadhana">
+    {/* Continuous sacred 432Hz ambient pad */}
+    <Audio
+      src={staticFile('navaratri-sadhana/vo/ambient-pad.mp3')}
+      startFrom={0}
+      endAt={TOTAL_FRAMES}
+      volume={0.15}
+    />
     <Series>
       <Series.Sequence durationInFrames={frames(SEGMENTS.hook.seconds)} name="Hook & Introduction">
         <HookIntro />

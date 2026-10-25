@@ -25,14 +25,14 @@ export const FONTS = {
   body: '"Inter", system-ui, sans-serif',
 } as const;
 
-// Segment durations in seconds (matches brief: 10:30 total)
+// Segment durations in seconds (matched tightly to voiceover length — no empty pauses)
 export const SEGMENTS = {
-  hook: { seconds: 90, label: 'Hook & Introduction', phase: 'TAMAS → AWAKENING' },
-  foundation: { seconds: 90, label: 'Mahalaya Amavasya', phase: 'CLEAR THE PAST' },
-  phase1: { seconds: 150, label: 'Days 1–3 · Knowledge & Energy', phase: 'TAMASIC CHAKRAS' },
-  phase2: { seconds: 120, label: 'Days 4–5 · Purpose & Creation', phase: 'RAJASIC CHAKRAS' },
-  phase3: { seconds: 120, label: 'Days 6–9 · Action & Mastery', phase: 'SATTVIK CHAKRAS' },
-  outro: { seconds: 60, label: 'Outro & Call to Action', phase: 'RECEIVE PERFECTION' },
+  hook: { seconds: 53, label: 'Hook & Introduction', phase: 'TAMAS → AWAKENING' },
+  foundation: { seconds: 54, label: 'Mahalaya Amavasya', phase: 'CLEAR THE PAST' },
+  phase1: { seconds: 85, label: 'Days 1–3 · Knowledge & Energy', phase: 'TAMASIC CHAKRAS' },
+  phase2: { seconds: 54, label: 'Days 4–5 · Purpose & Creation', phase: 'RAJASIC CHAKRAS' },
+  phase3: { seconds: 60, label: 'Days 6–9 · Action & Mastery', phase: 'SATTVIK CHAKRAS' },
+  outro: { seconds: 42, label: 'Outro & Call to Action', phase: 'RECEIVE PERFECTION' },
 } as const;
 
 export const frames = (seconds: number): number => Math.round(seconds * FPS);
@@ -40,4 +40,4 @@ export const frames = (seconds: number): number => Math.round(seconds * FPS);
 export const TOTAL_FRAMES = Object.values(SEGMENTS).reduce(
   (acc, s) => acc + frames(s.seconds),
   0,
-); // 18900 @30fps
+); // 10440 @30fps (~5:48)

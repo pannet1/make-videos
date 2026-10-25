@@ -17,7 +17,7 @@ VIDEO_DIR="${PROJECT_DIR}/videos/${VIDEO_ID}"
 SRC_DIR="${PROJECT_DIR}/src/videos/${VIDEO_ID}"
 INDEX="${PROJECT_DIR}/src/index.tsx"
 
-mkdir -p "${VIDEO_DIR}/vo" "${VIDEO_DIR}/assets" "${VIDEO_DIR}/sources" "${VIDEO_DIR}/edit" "${SRC_DIR}"
+mkdir -p "${VIDEO_DIR}/vo" "${VIDEO_DIR}/assets" "${VIDEO_DIR}/sources" "${VIDEO_DIR}/edit" "${VIDEO_DIR}/images" "${SRC_DIR}"
 
 if [[ ! -f "${VIDEO_DIR}/spec.md" ]]; then
   cat > "${VIDEO_DIR}/spec.md" <<EOF
@@ -72,6 +72,28 @@ export const ${NAME}: React.FC = () => (
 EOF
 fi
 
+if [[ ! -f "${VIDEO_DIR}/images/_config" ]]; then
+  cat > "${VIDEO_DIR}/images/_config" <<EOF
+# Storyboard defaults for ./scripts/generate-images.sh (KEY=VALUE, env overrides).
+# PRESET=auto: each prompt is classified automatically — people/faces/close-ups
+#   use Realistic Vision SD1.5, everything else uses fast SDXL-lightning.
+#   Force with PRESET=cinematic|photo or MODEL=<path|filename>. Only pin
+#   WIDTH/HEIGHT/STEPS/CFG if you want to override the auto-picked settings.
+# Same SEED + shared _style.txt across the batch = coherent set, not slides.
+PRESET=auto
+SEED=42
+EOF
+  cat > "${VIDEO_DIR}/images/_style.txt" <<EOF
+cinematic photorealistic, warm golden light, rich detail, 16:9 composition
+EOF
+  cat > "${VIDEO_DIR}/images/_negative.txt" <<EOF
+blurry, low quality, worst quality, jpeg artifacts, watermark, text, logo, deformed, disfigured, extra limbs, extra fingers, bad anatomy
+EOF
+  cat > "${VIDEO_DIR}/images/01-example.txt.example" <<EOF
+a serene sunrise over a south indian temple gopuram, mist, birds
+EOF
+fi
+
 if ! grep -q "import { ${NAME} } from './videos/${VIDEO_ID}/${NAME}';" "${INDEX}"; then
   sed -i "1i import { ${NAME} } from './videos/${VIDEO_ID}/${NAME}';" "${INDEX}"
   python3 - "${INDEX}" "${NAME}" <<'PY'
@@ -93,7 +115,10 @@ PY
 fi
 
 echo "Scaffolded ${VIDEO_ID} (${NAME})"
-echo "  videos/${VIDEO_ID}/  spec.md, vo/, assets/"
+echo "  videos/${VIDEO_ID}/  spec.md, vo/, assets/, images/"
 echo "  src/videos/${VIDEO_ID}/${NAME}.tsx  registered in src/index.tsx"
 echo "Next: write narration into videos/${VIDEO_ID}/vo/, drop assets into"
-echo "  videos/${VIDEO_ID}/assets/, then run ./scripts/generate-vo.sh ${VIDEO_ID}"
+echo "  videos/${VIDEO_ID}/assets/ (or generate a storyboard set: rename"
+echo "  images/01-example.txt.example -> *.txt, then"
+echo "  ./scripts/generate-images.sh ${VIDEO_ID}), then run"
+echo "  ./scripts/generate-vo.sh ${VIDEO_ID}"

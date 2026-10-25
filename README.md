@@ -22,7 +22,10 @@ docker exec rendiv sh -c "cd /workspace && ./node_modules/.bin/playwright instal
 ```bash
 ./scripts/new-video.sh <video-id> <CompositionName>   # scaffold
 # 1. write narration: videos/<video-id>/vo/NN-name.txt (one file per chapter)
-# 2. drop images/music: videos/<video-id>/assets/
+# 2. drop images/music: videos/<video-id>/assets/ — or generate a storyboard
+#    set: videos/<video-id>/images/*.txt (one prompt per image, shared
+#    _style.txt + _negative.txt keep 5-10 images coherent), then
+./scripts/generate-images.sh <video-id>                  # optional SD storyboard → assets/
 ./scripts/generate-vo.sh <video-id>                   # Tamil/English AI voiceover → public/<video-id>/vo/
 ./scripts/timings.sh <video-id>                       # prints VO_START/VO_LEN → paste into composition
 # 3. build scenes: src/videos/<video-id>/<CompositionName>.tsx (load the rendiv-video skill first)
@@ -51,6 +54,7 @@ docker exec rendiv sh -c "cd /workspace && ./node_modules/.bin/playwright instal
 |---|---|
 | New prompt-made video | `./scripts/new-video.sh <id> <Name>` |
 | Voiceover (Tamil default `ta-IN-ValluvarNeural`) | `./scripts/generate-vo.sh <id> [VOICE]` |
+| Storyboard images (local SD, optional) | `./scripts/generate-images.sh <id> [--force] [--dry-run]` |
 | Scene timings from VO | `./scripts/timings.sh <id>` |
 | Verify one frame | `./render.sh <Composition> --still [--frame N]` |
 | Rough draft | `./render.sh <Composition> --draft` |
@@ -65,8 +69,9 @@ docker exec rendiv sh -c "cd /workspace && ./node_modules/.bin/playwright instal
 
 ```
 videos/<video-id>/   sources/ (raw clips) · vo/NN-*.txt (narration source)
-                     assets/ (images/music) · spec.md · edit/ (transcripts,
-                     EDL, cuts, qc stills, final.mp4 — all local work files)
+                     assets/ (images/music) · images/*.txt (SD prompts, optional;
+                     _style.txt/_negative.txt/_config shared per batch) · spec.md
+                     · edit/ (transcripts, EDL, cuts, qc stills, final.mp4 — all local work files)
 src/                 index.tsx (registers compositions) · shared/ ·
                      videos/<id>/ (prompt-made scene code) · scenes/, components/
 public/<video-id>/   generated: vo/*.mp3, photos, assets (gitignored, regenerable)

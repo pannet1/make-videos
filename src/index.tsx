@@ -13,6 +13,14 @@ import { Outro } from './scenes/Outro';
 import { Thumbnail } from './Thumbnail';
 import { TOTAL_FRAMES, FPS, SEGMENTS, frames } from './theme';
 
+const scale720p = (Component: React.FC): React.FC => () => (
+  <div style={{ width: 1920, height: 1080, transform: 'scale(0.6666667)', transformOrigin: 'top left' }}>
+    <Component />
+  </div>
+);
+
+const NavaratriSadhana720p = scale720p(NavaratriSadhana);
+
 const Root: React.FC = () => (
   <>
     <Composition
@@ -23,7 +31,7 @@ const Root: React.FC = () => (
       width={1920}
       height={1080}
     />
-      <Composition
+    <Composition
       id="ChithiraiShorts"
       component={ChithiraiShorts}
       durationInFrames={1871}
@@ -39,22 +47,32 @@ const Root: React.FC = () => (
       width={1920}
       height={1080}
     />
+    {/* High-speed 1280x720 (720p HD) production master */}
     <Composition
       id="NavaratriSadhana"
+      component={NavaratriSadhana720p}
+      durationInFrames={TOTAL_FRAMES}
+      fps={FPS}
+      width={1280}
+      height={720}
+    />
+    {/* Optional full 1080p master */}
+    <Composition
+      id="NavaratriSadhana1080p"
       component={NavaratriSadhana}
       durationInFrames={TOTAL_FRAMES}
       fps={FPS}
       width={1920}
       height={1080}
     />
-    <Composition id="NavaratriHook" component={HookIntro} durationInFrames={frames(SEGMENTS.hook.seconds)} fps={FPS} width={1920} height={1080} />
-    <Composition id="NavaratriFoundation" component={Foundation} durationInFrames={frames(SEGMENTS.foundation.seconds)} fps={FPS} width={1920} height={1080} />
-    <Composition id="NavaratriPhase1" component={Phase1} durationInFrames={frames(SEGMENTS.phase1.seconds)} fps={FPS} width={1920} height={1080} />
-    <Composition id="NavaratriPhase2" component={Phase2} durationInFrames={frames(SEGMENTS.phase2.seconds)} fps={FPS} width={1920} height={1080} />
-    <Composition id="NavaratriPhase3" component={Phase3} durationInFrames={frames(SEGMENTS.phase3.seconds)} fps={FPS} width={1920} height={1080} />
-    <Composition id="NavaratriOutro" component={Outro} durationInFrames={frames(SEGMENTS.outro.seconds)} fps={FPS} width={1920} height={1080} />
+    <Composition id="NavaratriHook" component={scale720p(HookIntro)} durationInFrames={frames(SEGMENTS.hook.seconds)} fps={FPS} width={1280} height={720} />
+    <Composition id="NavaratriFoundation" component={scale720p(Foundation)} durationInFrames={frames(SEGMENTS.foundation.seconds)} fps={FPS} width={1280} height={720} />
+    <Composition id="NavaratriPhase1" component={scale720p(Phase1)} durationInFrames={frames(SEGMENTS.phase1.seconds)} fps={FPS} width={1280} height={720} />
+    <Composition id="NavaratriPhase2" component={scale720p(Phase2)} durationInFrames={frames(SEGMENTS.phase2.seconds)} fps={FPS} width={1280} height={720} />
+    <Composition id="NavaratriPhase3" component={scale720p(Phase3)} durationInFrames={frames(SEGMENTS.phase3.seconds)} fps={FPS} width={1280} height={720} />
+    <Composition id="NavaratriOutro" component={scale720p(Outro)} durationInFrames={frames(SEGMENTS.outro.seconds)} fps={FPS} width={1280} height={720} />
     <Still id="NavaratriThumbnail" component={Thumbnail} width={1280} height={720} />
-</>
+  </>
 );
 
 setRootComponent(Root);

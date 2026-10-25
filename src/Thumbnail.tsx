@@ -19,8 +19,8 @@ export const Thumbnail: React.FC = () => (
       {/* Kali photo — left half, full bleed */}
       <div style={{ position: 'absolute', left: 0, top: 0, width: 620, height: 720, overflow: 'hidden' }}>
         <Img
-          src={staticFile('kalaratri-devi.jpg')}
-          style={{ width: 620, height: 720, objectFit: 'cover', objectPosition: '50% 20%' }}
+          src={staticFile('navaratri-sadhana/assets/05_days6_7_goddess_kalaratri.png')}
+          style={{ width: 620, height: 720, objectFit: 'cover', objectPosition: '50% 25%' }}
         />
         {/* darken bottom for depth + blend edge into the dark right side */}
         <div
