@@ -10,6 +10,7 @@
     "compositions": "rendiv compositions src/index.tsx",
     "render:navaratri": "./render.sh NavaratriSadhana",
     "render:navaratri-draft": "./render.sh NavaratriSadhana --draft",
+    "watch": "./scripts/watch-folder.sh",
     "still:navaratri-thumb": "./render.sh NavaratriThumbnail --still"
   },
   "dependencies": {

@@ -6,5 +6,15 @@ rendiv/
 public/*/
 src/__ephemeral__.tsx
 src/videos/*
+.venv/
+__pycache__/
+*.pyc
+converter/.data_dir
+converter/data/
 !src/videos/demo/
 videos/*
+.venv/
+__pycache__/
+*.pyc
+converter/.data_dir
+converter/data/
