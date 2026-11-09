@@ -26,3 +26,6 @@ toolkit = { git = "https://github.com/pannet1/toolkit.git" }
 dev = [
     "pytest>=9.1.1",
 ]
+
+[tool.pytest.ini_options]
+python_files = ["*Tests.py", "test_*.py"]
