@@ -1,0 +1,65 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.333
+Most smart bathrooms fail for one simple reason: sensors hate steam.
+
+2
+00:00:07.333 --> 00:00:17.333
+PIR motion sensors cannot see through glass shower cabins, mmWave radars suffer from reflection noise, and battery sensors die in high humidity.
+
+3
+00:00:17.333 --> 00:00:25.500
+Even worse, naive rules like "turn light on when door closes" leave you stepping into pitch darkness.
+
+4
+00:00:25.533 --> 00:00:34.000
+Instead of struggling with wireless sensors inside the shower, Apartment Thread exploits the bathroom door as an absolute physical boundary.
+
+5
+00:00:34.000 --> 00:00:42.667
+We use a ₹57 MC-38 wired magnetic reed switch mounted on the exterior door jamb—completely isolated from interior moisture.
+
+6
+00:00:42.667 --> 00:00:54.433
+When the gap is under 15mm, the dry contact closes with zero battery maintenance and perpetual reliability.
+
+7
+00:00:54.467 --> 00:01:03.000
+In typical Indian apartments, a modular switchboard sits right next to the bathroom door frame.
+
+8
+00:01:03.000 --> 00:01:11.667
+We pull a 2-core wire through concealed conduit directly into input S2 of a Tinxy smart switch, leaving Relay 2 unconnected as a dummy channel.
+
+9
+00:01:11.667 --> 00:01:20.333
+Input S2 triggers a hardware GPIO interrupt in under 5ms on the ESP8266 silicon with zero wireless latency.
+
+10
+00:01:20.367 --> 00:01:28.667
+State 1: Opening the door immediately turns the light ON (<5ms)—illuminating the threshold before you enter.
+
+11
+00:01:28.667 --> 00:01:37.333
+State 2: Closing the door locks the vanity light and exhaust fan ON indefinitely—completely immune to shower steam or stillness.
+
+12
+00:01:37.333 --> 00:01:46.000
+State 3: Opening the door to exit starts a gentle 60-second vacancy countdown and ventilation dissipation cycle.
+
+13
+00:01:46.000 --> 00:01:56.100
+State 4: When the timer expires, the lights shut off automatically. A self-correcting loop that never desyncs.
+
+14
+00:01:56.133 --> 00:02:04.667
+The entire pattern is 100% local-first. If Wi-Fi drops or Home Assistant crashes, the switchboard operates identically on local silicon.
+
+15
+00:02:04.667 --> 00:02:13.667
+Standard physical rocker switches preserve manual override at all times, backed by a 45-minute safety watchdog.
+
+16
+00:02:13.667 --> 00:02:22.767
+High-reliability residential automation retrofitted into standard Indian modular switchboards for under ₹1,500 INR.

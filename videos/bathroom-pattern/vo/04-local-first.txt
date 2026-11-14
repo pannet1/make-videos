@@ -1,0 +1,1 @@
+Because this logic runs locally on the switchboard's microcontroller, it works with zero cloud and zero hub dependency. Even if Wi-Fi, Thread, or Home Assistant goes offline, the bathroom automates seamlessly. And the physical wall switches retain complete mechanical override at all times. Reliable, shower-proof, and battery-free.

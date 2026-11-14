@@ -4,6 +4,7 @@ out
 .studio
 rendiv/
 public/*/
+!public/bathroom-pattern/
 src/__ephemeral__.tsx
 src/videos/*
 .venv/
@@ -12,7 +13,10 @@ __pycache__/
 converter/.data_dir
 converter/data/
 !src/videos/demo/
+!src/videos/bathroom-pattern/
 videos/*
+!videos/bathroom-pattern/
+!videos/bathroom-pattern/**
 .venv/
 __pycache__/
 *.pyc

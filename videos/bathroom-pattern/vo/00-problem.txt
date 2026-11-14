@@ -1,0 +1,1 @@
+Most smart bathrooms fail for one simple reason: sensors hate steam. PIR motion sensors can't see through glass shower cabins, mmWave radars suffer from reflection noise, and battery-powered sensors die in high humidity. Even worse, naive rules like "turn light on when door closes" leave you stepping into pitch darkness.

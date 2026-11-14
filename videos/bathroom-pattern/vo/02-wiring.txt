@@ -1,0 +1,1 @@
+In Indian apartments, the switchboard is directly adjacent to the door frame. Instead of adding a wireless transmitter with batteries, we pull a thin, mains-insulated two-core wire straight into the switchboard. Connected to switch input S2 of an in-wall Tinxy module as a dummy channel, the dry contact triggers the onboard microcontroller directly.

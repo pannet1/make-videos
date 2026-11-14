@@ -1,0 +1,1 @@
+The Apartment Thread bathroom pattern solves this with physical boundary determinism. Because every bathroom has a door, we use a simple, passive MC-38 magnetic reed switch. Sourced for under sixty rupees, the magnet mounts on the moving door leaf, while the sensor body mounts on the exterior door jamb, completely isolated from hot shower steam and condensation.

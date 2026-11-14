@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "project": "ApartmentThread",
+  "pattern": "BA-01 Bathroom Presence Pattern",
+  "sensor": "DS-1 MC-38 Magnetic Door Contact",
+  "composition": "BathroomPattern",
+  "fps": 30,
+  "total_frames": 4284,
+  "total_duration_seconds": 142.8,
+  "cuts": [
+    {
+      "scene_index": 0,
+      "label": "00-problem",
+      "scene": "BathroomScene1Problem",
+      "title": "Why Smart Bathrooms Fail (PIR & mmWave Trap)",
+      "start_frame": 0,
+      "end_frame": 765,
+      "frames": 766,
+      "ss": 0.0,
+      "to": 25.5333
+    },
+    {
+      "scene_index": 1,
+      "label": "01-sensor",
+      "scene": "BathroomScene2Sensor",
+      "title": "Physical Boundary Determinism (MC-38 Reed Switch)",
+      "start_frame": 766,
+      "end_frame": 1633,
+      "frames": 868,
+      "ss": 0.0,
+      "to": 28.9333
+    },
+    {
+      "scene_index": 2,
+      "label": "02-wiring",
+      "scene": "BathroomScene3Wiring",
+      "title": "In-Wall Dummy Channel Wiring (Tinxy S2 Decoupling)",
+      "start_frame": 1634,
+      "end_frame": 2410,
+      "frames": 777,
+      "ss": 0.0,
+      "to": 25.9
+    },
+    {
+      "scene_index": 3,
+      "label": "03-statemachine",
+      "scene": "BathroomScene4StateMachine",
+      "title": "The 4-State Presence Engine (Sub-5ms Local Logic)",
+      "start_frame": 2411,
+      "end_frame": 3483,
+      "frames": 1073,
+      "ss": 0.0,
+      "to": 35.7667
+    },
+    {
+      "scene_index": 4,
+      "label": "04-localfirst",
+      "scene": "BathroomScene5LocalFirst",
+      "title": "100% Local-First & Fail-Safe Architecture",
+      "start_frame": 3484,
+      "end_frame": 4283,
+      "frames": 800,
+      "ss": 0.0,
+      "to": 26.6667
+    }
+  ]
+}

@@ -17,14 +17,14 @@ set -euo pipefail
 #   ./render.sh NavaratriThumbnail --still
 #
 # All performance settings (max concurrency, presets, quality) are baked in
-# below — no tuning flags. Draft mode currently supports NavaratriSadhana only.
+# below — no tuning flags. Dynamic draft mode scales any composition to 960x540.
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONTAINER_NAME="rendiv"
 IMAGE="node:20-bookworm"
 CONCURRENCY="$(nproc)"
 
-COMPOSITION="${1:?usage: render.sh ProjectName [--draft] [--still [--frame N]]}"
+COMPOSITION="${1:?usage: render.sh ProjectName [output.mp4] [--draft] [--still [--frame N]]}"
 shift
 MODE="render"
 ENTRY="src/index.tsx"
@@ -32,12 +32,17 @@ OUTPUT="out/${COMPOSITION,,}.mp4"
 EXTRA_ARGS=""
 
 DRAFT=0
+CUSTOM_OUTPUT=0
+STOP=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --draft) DRAFT=1 ;;
     --still) MODE="still" ;;
     --frame) EXTRA_ARGS="$EXTRA_ARGS --frame $2"; shift ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
+    --stop) STOP=1 ;;
+    -o|--output) OUTPUT="$2"; CUSTOM_OUTPUT=1; shift ;;
+    -*) echo "Unknown option: $1"; exit 1 ;;
+    *) OUTPUT="$1"; CUSTOM_OUTPUT=1 ;;
   esac
   shift
 done
@@ -46,39 +51,47 @@ if [[ "${MODE}" == "still" ]]; then
   OUTPUT="${OUTPUT%.mp4}"
   [[ "${OUTPUT}" != *.png ]] && OUTPUT="${OUTPUT}.png"
 elif [[ "${DRAFT}" == "1" ]]; then
-  if [[ "${COMPOSITION}" != "NavaratriSadhana" ]]; then
-    echo "ERROR: --draft currently supports NavaratriSadhana only" >&2
-    exit 1
+  if [[ "${CUSTOM_OUTPUT}" == "0" ]]; then
+    OUTPUT="out/${COMPOSITION,,}-draft.mp4"
   fi
-  OUTPUT="out/${COMPOSITION,,}-draft.mp4"
   ENTRY_FILE="src/__ephemeral__.tsx"
   CLEANUP_EPHEMERAL=1
+  TARGET_COMP="${COMPOSITION}"
+  DRAFT_COMP="${COMPOSITION}Draft"
   node -e "
 const fs = require('fs');
+const src = fs.readFileSync('src/index.tsx', 'utf8');
+const comp = '${TARGET_COMP}';
+const regex = new RegExp('<Composition\\\\b(?=[^>]*?\\\\bid=[\"\'\`]' + comp + '[\"\'\`])[^>]*?\\\\/>', 's');
+const match = src.match(regex);
+if (!match) {
+  console.error('ERROR: Composition \"' + comp + '\" not found in src/index.tsx');
+  process.exit(1);
+}
+const compName = match[0].match(/component=\\{([^}]+)\\}/)[1];
+const duration = match[0].match(/durationInFrames=\\{([^}]+)\\}/)[1];
+const fps = match[0].match(/fps=\\{([^}]+)\\}/)[1];
+const header = src.split('const Root: React.FC')[0];
 const lines = [
-  \"import React from 'react';\",
-  \"import { setRootComponent, Composition } from '@rendiv/core';\",
-  \"import { TOTAL_FRAMES } from './theme';\",
-  \"import { NavaratriSadhana } from './NavaratriSadhana';\",
-  '',
+  header,
   'const Draft: React.FC = () => (',
   '  <div style={{ width: 1920, height: 1080, transform: \\'scale(0.5)\\', transformOrigin: \\'top left\\' }}>',
-  '    <NavaratriSadhana />',
+  '    <' + compName + ' />',
   '  </div>',
   ');',
   '',
   'const Root: React.FC = () => (',
-  '  <Composition id=\"NavaratriDraft\" component={Draft}',
-  '    durationInFrames={TOTAL_FRAMES} fps={30} width={960} height={540} />',
+  '  <Composition id=\"${DRAFT_COMP}\" component={Draft}',
+  '    durationInFrames={' + duration + '} fps={' + fps + '} width={960} height={540} />',
   ');',
   '',
   'setRootComponent(Root);',
   '',
 ];
-fs.writeFileSync('$ENTRY_FILE', lines.join('\n'));
-console.log('draft entry: $ENTRY_FILE (960x540, removed on exit)');
+fs.writeFileSync('${ENTRY_FILE}', lines.join('\\n'));
+console.log('draft entry: ${ENTRY_FILE} (960x540, removed on exit)');
 "
-  COMPOSITION="NavaratriDraft"
+  COMPOSITION="${DRAFT_COMP}"
   ENTRY="${ENTRY_FILE}"
   EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 60 --preset ultrafast --crf 30"
 else
@@ -111,3 +124,8 @@ CMD="node /workspace/node_modules/@rendiv/cli/dist/cli.js ${MODE} ${ENTRY} ${COM
 docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}"
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"
+
+if [[ "${STOP}" == "1" || "${STOP_CONTAINER:-0}" == "1" ]]; then
+  echo "Stopping ${CONTAINER_NAME} container..."
+  docker stop "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+fi

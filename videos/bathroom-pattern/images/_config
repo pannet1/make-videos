@@ -1,0 +1,8 @@
+# Storyboard defaults for ./scripts/generate-images.sh (KEY=VALUE, env overrides).
+# PRESET=auto: each prompt is classified automatically — people/faces/close-ups
+#   use Realistic Vision SD1.5, everything else uses fast SDXL-lightning.
+#   Force with PRESET=cinematic|photo or MODEL=<path|filename>. Only pin
+#   WIDTH/HEIGHT/STEPS/CFG if you want to override the auto-picked settings.
+# Same SEED + shared _style.txt across the batch = coherent set, not slides.
+PRESET=auto
+SEED=42
