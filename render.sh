@@ -98,30 +98,143 @@ else
   EXTRA_ARGS=" --concurrency ${CONCURRENCY} --image-format jpeg --jpeg-quality 85 --preset faster --crf 20"
 fi
 
-if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-  docker start "${CONTAINER_NAME}" >/dev/null
-else
+# --- dependency self-healing ------------------------------------------------
+# The container's writable layer loses downloaded browsers/fonts whenever the
+# container is recreated, and node_modules can carry MULTIPLE playwright
+# versions (pnpm nests one under @rendiv/renderer while a stray hoisted copy
+# shadows top-level resolution). Guessing which one the render uses fails, so
+# instead: scan EVERY playwright-core copy, read the browser revision each one
+# pins from its own browsers.json, and download only the pinned executables
+# that are missing — using that exact copy's own CLI. Whichever version the
+# renderer resolves at runtime, its browsers are already in the container.
+
+PW_CACHE="/root/.cache/ms-playwright"
+
+browser_present() { # dir exe-path-inside-dir
+  docker exec "${CONTAINER_NAME}" test -f "${PW_CACHE}/${1}/${2}" 2>/dev/null
+}
+
+ensure_browsers() {
+  local MISSING_COPIES="" REL REV REV_C REV_S HAS_SHELL CLI_IN NEED INSTALL_ARGS SPEC
+  while IFS= read -r REL; do
+    REV="$(node -e '
+const b = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).browsers;
+const r = Object.fromEntries(b.map((x) => [x.name, x.revision]));
+const shell = b.find((x) => x.name === "chromium-headless-shell");
+console.log(r.chromium || "-", shell ? shell.revision : "-", shell ? "Y" : "N");
+' "${REL}/browsers.json" 2>/dev/null || echo "- - N")"
+    read -r REV_C REV_S HAS_SHELL <<<"${REV}"
+    [[ "${REV_C}" != "-" ]] || continue
+    CLI_IN="/workspace/${REL}/cli.js"
+    NEED=0
+    INSTALL_ARGS="chromium"
+    if ! browser_present "chromium-${REV_C}" "chrome-linux/chrome"; then NEED=1; fi
+    if [[ "${HAS_SHELL}" == "Y" ]]; then
+      INSTALL_ARGS+=" chromium-headless-shell"
+      if ! browser_present "chromium_headless_shell-${REV_S}" \
+        "chrome-headless-shell-linux64/chrome-headless-shell"; then NEED=1; fi
+    fi
+    if [[ "${NEED}" == "1" ]]; then
+      echo "render.sh: ${REL} pins chromium rev ${REV_C} — browsers missing."
+      MISSING_COPIES+="${CLI_IN} ${INSTALL_ARGS}"$'\n'
+    fi
+  done < <(
+    {
+      ls -d node_modules/playwright-core 2>/dev/null
+      ls -d node_modules/.pnpm/playwright-core@*/node_modules/playwright-core 2>/dev/null
+      ls -d node_modules/.pnpm/playwright@*/node_modules/playwright-core 2>/dev/null
+    } | sort -u
+  )
+
+  if [[ -n "${MISSING_COPIES}" ]]; then
+    while IFS= read -r SPEC; do
+      [[ -n "${SPEC}" ]] || continue
+      echo "render.sh: downloading missing Playwright browsers via ${SPEC%% *}..."
+      docker exec -w /workspace -e PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 \
+        "${CONTAINER_NAME}" node ${SPEC}
+    done <<<"${MISSING_COPIES}"
+  fi
+}
+
+# --- container bootstrap -----------------------------------------------------
+if ! docker inspect "${CONTAINER_NAME}" >/dev/null 2>&1; then
   docker run -d --name "${CONTAINER_NAME}" -v "${PROJECT_DIR}:/workspace" \
     "${IMAGE}" sh -c "tail -f /dev/null" >/dev/null
+elif [[ "$(docker inspect -f '{{.State.Running}}' "${CONTAINER_NAME}")" != "true" ]]; then
+  docker start "${CONTAINER_NAME}" >/dev/null
 fi
 
 if [[ "${CLEANUP_EPHEMERAL:-0}" == "1" ]]; then
   trap 'rm -f "${PROJECT_DIR}/${ENTRY_FILE}"' EXIT
 fi
 
-if ! docker exec "${CONTAINER_NAME}" test -f /workspace/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/ffmpeg; then
-  docker exec "${CONTAINER_NAME}" sh -c \
-    "node /workspace/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/install.js"
+# ffmpeg-static: resolve version dynamically instead of hardcoding it.
+FFMPEG_REL="$(node -e '
+try {
+  const path = require("path");
+  console.log(path.relative(process.cwd(), path.dirname(require.resolve("ffmpeg-static/package.json"))));
+} catch (e) { process.exit(1); }
+' 2>/dev/null || true)"
+if [[ -n "${FFMPEG_REL}" ]]; then
+  if ! docker exec "${CONTAINER_NAME}" test -f "/workspace/${FFMPEG_REL}/ffmpeg" 2>/dev/null; then
+    echo "render.sh: installing ffmpeg-static binary..."
+    docker exec -w /workspace "${CONTAINER_NAME}" \
+      node "/workspace/${FFMPEG_REL}/install.js"
+  fi
 fi
 
-if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-fonts-done; then
+# Fonts: one-time apt install, stamped in the container.
+if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-fonts-done 2>/dev/null; then
   docker exec "${CONTAINER_NAME}" sh -c \
     "apt-get update -qq && apt-get install -y -qq fonts-inter fonts-liberation fontconfig" 2>&1 | tail -n 2 || true
-  docker exec "${CONTAINER_NAME}" touch /root/.rendiv-fonts-done || true
+  docker exec "${CONTAINER_NAME}" touch /root/.rendiv-fonts-done 2>/dev/null || true
 fi
 
+# Chromium system libraries: only if genuinely missing (e.g. freshly created
+# container). playwright's own install-deps knows the exact package list.
+if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-playwright-deps-done 2>/dev/null; then
+  if ! docker exec "${CONTAINER_NAME}" sh -c 'ldconfig -p 2>/dev/null | grep -q "libgtk-3.so.0"'; then
+    echo "render.sh: installing Chromium system libraries (one-time)..."
+    docker exec "${CONTAINER_NAME}" node /workspace/node_modules/playwright/cli.js install-deps chromium || true
+    docker exec "${CONTAINER_NAME}" touch /root/.rendiv-playwright-deps-done 2>/dev/null || true
+  else
+    docker exec "${CONTAINER_NAME}" touch /root/.rendiv-playwright-deps-done 2>/dev/null || true
+  fi
+fi
+
+# Browsers: for every playwright-core copy in node_modules, check the exact
+# executable its browsers.json pins and download it if missing.
+ensure_browsers
+
+# --- render (with one self-healing retry) -------------------------------------
 CMD="node /workspace/node_modules/@rendiv/cli/dist/cli.js ${MODE} ${ENTRY} ${COMPOSITION} ${OUTPUT}${EXTRA_ARGS}"
-docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}"
+LOG="$(mktemp)"
+RENDER_OK=0
+for _attempt in 1 2 3; do
+  if docker exec -w /workspace "${CONTAINER_NAME}" sh -c "${CMD}" 2>&1 | tee "${LOG}"; then
+    RENDER_OK=1
+    break
+  fi
+  if grep -q "Executable doesn't exist" "${LOG}"; then
+    echo "render.sh: stale Playwright browser cache — reinstalling pinned browsers..."
+    if ! docker exec "${CONTAINER_NAME}" test -f /root/.rendiv-playwright-deps-done 2>/dev/null; then
+      docker exec "${CONTAINER_NAME}" node /workspace/node_modules/playwright/cli.js install-deps chromium || true
+      docker exec "${CONTAINER_NAME}" touch /root/.rendiv-playwright-deps-done 2>/dev/null || true
+    fi
+    ensure_browsers
+  elif grep -q "Host system is missing dependencies" "${LOG}"; then
+    echo "render.sh: missing system libraries — installing Chromium deps..."
+    docker exec "${CONTAINER_NAME}" node /workspace/node_modules/playwright/cli.js install-deps chromium || true
+    docker exec "${CONTAINER_NAME}" touch /root/.rendiv-playwright-deps-done 2>/dev/null || true
+  else
+    break  # unrelated failure — don't mask it with retries
+  fi
+done
+rm -f "${LOG}"
+if [[ "${RENDER_OK}" != "1" ]]; then
+  echo "Render failed after ${_attempt} attempt(s)."
+  exit 1
+fi
 
 echo "Output written to: ${PROJECT_DIR}/${OUTPUT}"
 
