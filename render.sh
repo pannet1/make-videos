@@ -136,7 +136,7 @@ console.log(r.chromium || "-", shell ? shell.revision : "-", shell ? "Y" : "N");
     fi
     if [[ "${NEED}" == "1" ]]; then
       echo "render.sh: ${REL} pins chromium rev ${REV_C} — browsers missing."
-      MISSING_COPIES+="${CLI_IN} ${INSTALL_ARGS}"$'\n'
+      MISSING_COPIES+="${CLI_IN} install ${INSTALL_ARGS}"$'\n'
     fi
   done < <(
     {
